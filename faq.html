@@ -6,73 +6,55 @@
     <title>FAQ - TempTools</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <style>
-        body { font-family: system-ui, -apple-system, sans-serif; }
-        .faq-question { cursor: pointer; }
-    </style>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style> body { font-family: system-ui, -apple-system, sans-serif; } </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
-    <div class="max-w-3xl mx-auto p-6 py-12">
-        <div class="flex items-center gap-3 mb-8">
-            <i class="fas fa-tools text-3xl text-blue-500"></i>
-            <h1 class="text-3xl font-bold">TempTools</h1>
+
+    <nav class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-tools text-3xl text-blue-500"></i>
+                <h1 class="text-2xl font-bold">TempTools</h1>
+            </div>
+            <div class="flex items-center gap-8 text-sm font-medium">
+                <a href="index.html" class="nav-link text-gray-300 hover:text-white">🛠 Tools</a>
+                <a href="about.html" class="nav-link text-gray-300 hover:text-white">About</a>
+                <a href="faq.html" class="nav-link text-white">FAQ</a>
+                <a href="privacy.html" class="nav-link text-gray-300 hover:text-white">Privacy</a>
+            </div>
         </div>
-        
-        <h1 class="text-4xl font-bold mb-2">Frequently Asked Questions</h1>
-        <p class="text-gray-400 mb-10">Last updated: April 29, 2026</p>
+    </nav>
 
-        <div class="space-y-6">
-            
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Is TempTools completely free?</h3>
-                <p class="text-gray-300">Yes! All tools including temporary email, QR code generator, image compressor, and password generator are 100% free with no signup or hidden fees.</p>
+    <div class="max-w-4xl mx-auto px-6 py-12">
+        <h1 class="text-4xl font-bold mb-10">Frequently Asked Questions</h1>
+
+        <div class="space-y-8">
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Is TempTools really free?</h3>
+                <p class="text-gray-400">Yes. All tools are completely free with no limits or premium plans.</p>
             </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">How does the temporary email work?</h3>
-                <p class="text-gray-300">We use Guerrilla Mail's public service. Emails are received in real-time and automatically deleted after some time. The inbox is public, so anyone with the address can see the emails.</p>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Do you store my data?</h3>
+                <p class="text-gray-400">No. Image compression, password generation, QR codes, and text tools run entirely in your browser. We do not store anything.</p>
             </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Are my images and data private?</h3>
-                <p class="text-gray-300">Yes. Image compression, QR code generation, and password generation all happen directly in your browser. Nothing is uploaded to our servers.</p>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">How long does the temporary email last?</h3>
+                <p class="text-gray-400">The inbox stays active for about 10 minutes. After that, a new email is generated.</p>
             </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Why can't I receive emails sometimes?</h3>
-                <p class="text-gray-300">Some email providers (especially Gmail) are strict with temporary email domains. Try using a different sender (Outlook, Yahoo, ProtonMail) or generate a new address.</p>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Are the passwords secure?</h3>
+                <p class="text-gray-400">Yes. Passwords are generated randomly in your browser using strong character sets.</p>
             </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">How long do temporary emails last?</h3>
-                <p class="text-gray-300">The timer shows 10 minutes. When it reaches zero, a new email address is automatically generated. You can also click "New Address" anytime.</p>
+            <div>
+                <h3 class="text-xl font-semibold mb-2">Can I use this for important sign-ups?</h3>
+                <p class="text-gray-400">Temporary email is good for one-time verifications, but we recommend using your real email for important accounts.</p>
             </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Do you store any of my data?</h3>
-                <p class="text-gray-300">No. We do not store emails, uploaded images, generated passwords, or any personal information. Everything is processed locally or by third-party services.</p>
-            </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Can I use these tools for important work?</h3>
-                <p class="text-gray-300">Our tools are great for quick tasks, testing, and privacy protection, but we recommend using official services for critical or sensitive work.</p>
-            </div>
-
-            <div class="bg-gray-800 rounded-2xl p-6">
-                <h3 class="text-xl font-semibold mb-3">Will you add more tools?</h3>
-                <p class="text-gray-300">Yes! We plan to add more utilities like URL shortener, unit converter, base64 encoder, etc. Let us know what you want to see next.</p>
-            </div>
-
-        </div>
-
-        <div class="mt-12 flex gap-6">
-            <a href="index.html" class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
-                ← Back to Tools
-            </a>
-            <a href="privacy.html" class="inline-flex items-center gap-2 text-blue-400 hover:text-blue-300">
-                Privacy Policy →
-            </a>
         </div>
     </div>
+
+    <footer class="bg-gray-950 border-t border-gray-800 py-8 text-center text-gray-500 text-sm">
+        © 2026 TempTools • <a href="privacy.html" class="hover:text-gray-300">Privacy</a> • <a href="terms.html" class="hover:text-gray-300">Terms</a>
+    </footer>
 </body>
 </html>
