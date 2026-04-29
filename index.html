@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TempMail - 10 Minute Disposable Email</title>
+    <title>TempMail - Instant Disposable Email</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
-        .email-list { max-height: 60vh; overflow-y: auto; }
+        .email-list { max-height: 65vh; overflow-y: auto; }
         .message-body { white-space: pre-wrap; }
     </style>
 </head>
@@ -19,7 +19,7 @@
                 <i class="fas fa-envelope text-4xl text-blue-500"></i>
                 <div>
                     <h1 class="text-3xl font-bold">TempMail</h1>
-                    <p class="text-sm text-gray-400">Disposable email • Powered by Guerrilla Mail</p>
+                    <p class="text-sm text-gray-400">Instant disposable email • Powered by Guerrilla Mail</p>
                 </div>
             </div>
             <button onclick="newEmail()" 
@@ -31,11 +31,12 @@
         <!-- Email Address -->
         <div class="bg-gray-800 rounded-2xl p-6 mb-8 shadow-xl">
             <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div>
+                <div class="flex-1">
                     <p class="text-gray-400 text-sm mb-1">Your temporary email</p>
                     <div class="flex items-center gap-3">
-                        <code id="email" class="bg-gray-900 px-4 py-3 rounded-xl text-xl font-mono break-all"></code>
-                        <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
+                        <code id="email" class="bg-gray-900 px-4 py-3 rounded-xl text-xl font-mono break-all flex-1"></code>
+                        <button onclick="copyEmail()" 
+                                class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
@@ -53,29 +54,28 @@
                 <h2 class="font-semibold flex items-center gap-2">
                     <i class="fas fa-inbox"></i> Inbox
                 </h2>
-                <button onclick="refreshInbox()" class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
+                <button onclick="refreshInbox()" 
+                        class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
                     <i class="fas fa-sync"></i> Refresh
                 </button>
             </div>
             <div id="inbox" class="email-list divide-y divide-gray-700"></div>
         </div>
+    </div>
 
-        <!-- Email Viewer -->
-        <div id="viewer" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-            <div class="bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-                <div class="p-6 border-b border-gray-700 flex justify-between">
-                    <h3 id="viewer-subject" class="font-semibold text-lg"></h3>
-                    <button onclick="closeViewer()" class="text-gray-400 hover:text-white">
-                        <i class="fas fa-times text-2xl"></i>
-                    </button>
+    <!-- Email Viewer -->
+    <div id="viewer" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                <h3 id="viewer-subject" class="font-semibold text-lg"></h3>
+                <button onclick="closeViewer()" class="text-gray-400 hover:text-white text-2xl">✕</button>
+            </div>
+            <div class="p-6 text-sm">
+                <div class="flex justify-between text-gray-400 mb-4 text-sm">
+                    <div>From: <span id="viewer-from" class="font-mono"></span></div>
+                    <div id="viewer-time"></div>
                 </div>
-                <div class="p-6 text-sm">
-                    <div class="flex justify-between text-gray-400 mb-4">
-                        <div>From: <span id="viewer-from" class="font-mono"></span></div>
-                        <div id="viewer-time"></div>
-                    </div>
-                    <div id="viewer-body" class="message-body text-gray-200 leading-relaxed"></div>
-                </div>
+                <div id="viewer-body" class="message-body text-gray-200 leading-relaxed prose prose-invert max-w-none"></div>
             </div>
         </div>
     </div>
@@ -102,7 +102,7 @@
                 startTimer();
                 startAutoRefresh();
             } catch (e) {
-                alert("Could not connect to service. Try again in a few seconds.");
+                alert("Service busy. Please try again in a few seconds.");
             }
         }
 
@@ -125,15 +125,13 @@
                 const data = await res.json();
                 messages = data.list || [];
                 updateInbox();
-            } catch (e) {
-                console.error("Inbox fetch failed");
-            }
+            } catch (e) {}
         }
 
         function updateInbox() {
             const inboxEl = document.getElementById('inbox');
             if (messages.length === 0) {
-                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send email to <span class="font-mono">${currentEmail}</span></div>`;
+                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send an email to <span class="font-mono">${currentEmail}</span></div>`;
                 return;
             }
             inboxEl.innerHTML = messages.map(msg => `
@@ -164,27 +162,29 @@
 
                 document.getElementById('viewer').classList.remove('hidden');
             } catch (e) {
-                alert("Could not open message.");
+                alert("Could not load message.");
             }
         }
 
         function startAutoRefresh() {
             if (inboxInterval) clearInterval(inboxInterval);
-            inboxInterval = setInterval(fetchInbox, 5000);
+            inboxInterval = setInterval(fetchInbox, 4000);
         }
 
         function copyEmail() {
-            navigator.clipboard.writeText(currentEmail);
-            const el = document.getElementById('email');
-            const orig = el.style.backgroundColor;
-            el.style.backgroundColor = '#166534';
-            setTimeout(() => el.style.backgroundColor = orig, 800);
+            navigator.clipboard.writeText(currentEmail).then(() => {
+                const el = document.getElementById('email');
+                const orig = el.style.backgroundColor;
+                el.style.backgroundColor = '#166534';
+                setTimeout(() => el.style.backgroundColor = orig, 700);
+            });
         }
 
         function refreshInbox() { fetchInbox(); }
         function newEmail() { generateNewEmail(); }
         function closeViewer() { document.getElementById('viewer').classList.add('hidden'); }
 
+        // Start the app
         window.onload = () => {
             generateNewEmail();
         };
