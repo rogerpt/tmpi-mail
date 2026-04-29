@@ -19,7 +19,7 @@
                 <i class="fas fa-envelope text-4xl text-blue-500"></i>
                 <div>
                     <h1 class="text-3xl font-bold">TempMail</h1>
-                    <p class="text-sm text-gray-400">Disposable email • Expires in 10 minutes</p>
+                    <p class="text-sm text-gray-400">Disposable email • Powered by Guerrilla Mail</p>
                 </div>
             </div>
             <button onclick="newEmail()" 
@@ -81,39 +81,28 @@
     </div>
 
     <script>
+        let sidToken = '';
         let currentEmail = '';
-        let currentLogin = '';
-        let currentDomain = '';
         let timerInterval;
         let inboxInterval;
         let messages = [];
 
-        const domains = ['1secmail.com', '1secmail.org', '1secmail.net', 'wwjmp.com', 'esiix.com'];
-
-        function generateRandomLogin() {
-            return Math.random().toString(36).substring(2, 12);
-        }
-
         async function generateNewEmail() {
-            let success = false;
-            for (let domain of domains) {
-                try {
-                    currentLogin = generateRandomLogin();
-                    currentDomain = domain;
-                    currentEmail = `${currentLogin}@${currentDomain}`;
+            try {
+                const res = await fetch('https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en');
+                const data = await res.json();
+                
+                sidToken = data.sid_token;
+                currentEmail = data.email_addr;
 
-                    document.getElementById('email').textContent = currentEmail;
-                    messages = [];
-                    updateInbox();
+                document.getElementById('email').textContent = currentEmail;
+                messages = [];
+                updateInbox();
 
-                    startTimer();
-                    startAutoRefresh();
-                    success = true;
-                    break;
-                } catch (e) {}
-            }
-            if (!success) {
-                alert("All services are busy. Please try 'New Address' again in a few seconds.");
+                startTimer();
+                startAutoRefresh();
+            } catch (e) {
+                alert("Could not connect to service. Try again in a few seconds.");
             }
         }
 
@@ -130,11 +119,11 @@
         }
 
         async function fetchInbox() {
-            if (!currentLogin || !currentDomain) return;
+            if (!sidToken) return;
             try {
-                const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain}`);
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&lang=en&sid_token=${sidToken}`);
                 const data = await res.json();
-                messages = Array.isArray(data) ? data : [];
+                messages = data.list || [];
                 updateInbox();
             } catch (e) {
                 console.error("Inbox fetch failed");
@@ -148,31 +137,31 @@
                 return;
             }
             inboxEl.innerHTML = messages.map(msg => `
-                <div onclick="openMessage(${msg.id})" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
+                <div onclick="openMessage('${msg.mail_id}')" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
                     <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-envelope text-blue-400"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between">
-                            <p class="font-medium truncate">${msg.from}</p>
-                            <p class="text-xs text-gray-500">${new Date(msg.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                            <p class="font-medium truncate">${msg.mail_from}</p>
+                            <p class="text-xs text-gray-500">${new Date(msg.mail_timestamp * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
                         </div>
-                        <p class="text-gray-300 truncate">${msg.subject || '(no subject)'}</p>
+                        <p class="text-gray-300 truncate">${msg.mail_subject || '(no subject)'}</p>
                     </div>
                 </div>
             `).join('');
         }
 
-        async function openMessage(id) {
+        async function openMessage(mailId) {
             try {
-                const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id}`);
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=${mailId}&lang=en&sid_token=${sidToken}`);
                 const msg = await res.json();
-                
-                document.getElementById('viewer-subject').textContent = msg.subject || '(no subject)';
-                document.getElementById('viewer-from').textContent = msg.from;
-                document.getElementById('viewer-time').textContent = new Date(msg.date).toLocaleString();
-                document.getElementById('viewer-body').innerHTML = msg.textBody ? msg.textBody.replace(/\n/g, '<br>') : (msg.htmlBody || 'No content');
-                
+
+                document.getElementById('viewer-subject').textContent = msg.mail_subject || '(no subject)';
+                document.getElementById('viewer-from').textContent = msg.mail_from;
+                document.getElementById('viewer-time').textContent = new Date(msg.mail_timestamp * 1000).toLocaleString();
+                document.getElementById('viewer-body').innerHTML = msg.mail_body || 'No content';
+
                 document.getElementById('viewer').classList.remove('hidden');
             } catch (e) {
                 alert("Could not open message.");
