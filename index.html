@@ -11,32 +11,38 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     
-    <link rel="icon" href="https://temptools.vercel.app/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
         .email-list { max-height: 55vh; overflow-y: auto; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
         .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s; }
+        .nav-link { transition: all 0.2s; }
+        .nav-link:hover { color: #60a5fa; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
-    <div class="max-w-6xl mx-auto p-6">
-        <!-- Header -->
-        <header class="flex justify-between items-center mb-8">
+    
+    <!-- Navigation Bar -->
+    <nav class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <i class="fas fa-tools text-4xl text-blue-500"></i>
-                <div>
-                    <h1 class="text-3xl font-bold">TempTools</h1>
-                    <p class="text-sm text-gray-400">Free utilities • Privacy friendly</p>
-                </div>
+                <i class="fas fa-tools text-3xl text-blue-500"></i>
+                <h1 class="text-2xl font-bold">TempTools</h1>
             </div>
-            <div class="flex gap-6 text-sm">
-                <a href="faq.html" class="hover:text-blue-400">FAQ</a>
-                <a href="privacy.html" class="hover:text-blue-400">Privacy</a>
+            
+            <div class="flex items-center gap-8 text-sm font-medium">
+                <a href="index.html" class="nav-link text-white">🛠 Tools</a>
+                <a href="about.html" class="nav-link text-gray-300 hover:text-white">About</a>
+                <a href="faq.html" class="nav-link text-gray-300 hover:text-white">FAQ</a>
+                <a href="privacy.html" class="nav-link text-gray-300 hover:text-white">Privacy</a>
             </div>
-        </header>
+        </div>
+    </nav>
 
+    <div class="max-w-6xl mx-auto p-6">
+        
         <!-- Top AdSense Placeholder -->
         <div class="my-6 bg-gray-800 border border-dashed border-gray-600 rounded-2xl p-4 text-center text-gray-500 min-h-[90px] flex items-center justify-center">
             [ AdSense Leaderboard Banner - 728×90 ]
@@ -51,7 +57,7 @@
             <button onclick="switchTab(4)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab4">📝 Text Tools</button>
         </div>
 
-        <!-- ==================== TEMP MAIL ==================== -->
+        <!-- TEMP MAIL -->
         <div id="content0">
             <div class="bg-gray-800 rounded-2xl p-6 mb-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -191,7 +197,7 @@
     </div>
 
     <script>
-        // ==================== TEMP MAIL ====================
+        // TEMP MAIL
         let sidToken = '', currentEmail = '';
         let timerInterval, inboxInterval, messages = [];
 
@@ -271,7 +277,7 @@
         function refreshInbox() { fetchInbox(); }
         function closeViewer() { document.getElementById('viewer').classList.add('hidden'); }
 
-        // ==================== TABS ====================
+        // TAB SWITCHING
         function switchTab(n) {
             document.querySelectorAll('[id^="content"]').forEach(el => el.classList.add('hidden'));
             document.getElementById('content' + n).classList.remove('hidden');
@@ -279,7 +285,7 @@
             document.getElementById('tab' + n).classList.add('tab-active');
         }
 
-        // ==================== QR CODE ====================
+        // QR CODE
         let currentQR = null;
         function generateQR() {
             const text = document.getElementById('qrtext').value.trim() || "https://temptools.vercel.app";
@@ -294,7 +300,7 @@
             link.click();
         }
 
-        // ==================== PASSWORD ====================
+        // PASSWORD
         function generatePassword() {
             const length = 16;
             let chars = '';
@@ -311,7 +317,7 @@
             if (pass) navigator.clipboard.writeText(pass);
         }
 
-        // ==================== IMAGE COMPRESSOR ====================
+        // IMAGE COMPRESSOR
         let originalFile = null;
         let compressedDataUrl = null;
 
@@ -366,16 +372,12 @@
             a.click();
         }
 
-        // ==================== TEXT TOOLS ====================
+        // TEXT TOOLS
         function countText() {
             const text = document.getElementById('textinput').value.trim();
             const words = text.split(/\s+/).filter(Boolean).length;
             const chars = text.length;
-            document.getElementById('textresult').innerHTML = `
-                <strong>Words:</strong> ${words} | 
-                <strong>Characters:</strong> ${chars} | 
-                <strong>No spaces:</strong> ${text.replace(/\s/g,'').length}
-            `;
+            document.getElementById('textresult').innerHTML = `<strong>Words:</strong> ${words} | <strong>Characters:</strong> ${chars} | <strong>No spaces:</strong> ${text.replace(/\s/g,'').length}`;
         }
         function toUpper() { document.getElementById('textinput').value = document.getElementById('textinput').value.toUpperCase(); }
         function toLower() { document.getElementById('textinput').value = document.getElementById('textinput').value.toLowerCase(); }
