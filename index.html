@@ -10,8 +10,8 @@
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
         .email-list { max-height: 55vh; overflow-y: auto; }
-        .tab-active { border-bottom: 3px solid #3b82f6; color: white; }
-        .drop-zone { border: 3px dashed #4b5563; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
+        .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -27,16 +27,15 @@
         </header>
 
         <!-- Tabs -->
-        <div class="flex border-b border-gray-700 mb-6 overflow-x-auto">
+        <div class="flex border-b border-gray-700 mb-6 overflow-x-auto pb-1">
             <button onclick="switchTab(0)" class="tab-active px-6 py-3 text-lg font-medium whitespace-nowrap" id="tab0">📧 Temp Mail</button>
             <button onclick="switchTab(1)" class="px-6 py-3 text-lg font-medium text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab1">🔲 QR Code</button>
             <button onclick="switchTab(2)" class="px-6 py-3 text-lg font-medium text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab2">🔑 Password</button>
             <button onclick="switchTab(3)" class="px-6 py-3 text-lg font-medium text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab3">🖼️ Image Compressor</button>
         </div>
 
-        <!-- TEMP MAIL -->
+        <!-- TEMP MAIL TAB -->
         <div id="content0">
-            <!-- (Same as previous version - kept short for space) -->
             <div class="bg-gray-800 rounded-2xl p-6 mb-8">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
@@ -55,114 +54,22 @@
                         <button onclick="generateCustomEmail()" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium">Generate Email</button>
                     </div>
                 </div>
+
                 <div class="mt-6 flex gap-3">
                     <code id="email" class="bg-gray-900 px-5 py-4 rounded-xl text-xl font-mono flex-1"></code>
                     <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl"><i class="fas fa-copy"></i></button>
                 </div>
+
                 <div class="text-center mt-4">
                     <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
                 </div>
             </div>
+
             <div class="bg-gray-800 rounded-2xl overflow-hidden">
                 <div class="px-6 py-4 border-b flex justify-between">
                     <h2 class="font-semibold">Inbox</h2>
-                    <button onclick="refreshInbox()" class="text-blue-400">Refresh</button>
+                    <button onclick="refreshInbox()" class="text-blue-400 hover:text-white">Refresh</button>
                 </div>
                 <div id="inbox" class="email-list divide-y divide-gray-700"></div>
             </div>
-        </div>
-
-        <!-- QR CODE -->
-        <div id="content1" class="hidden">
-            <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-center">QR Code Generator</h2>
-                <input id="qrtext" type="text" placeholder="Enter text or URL..." class="w-full bg-gray-900 border border-gray-700 rounded-2xl px-5 py-4 mb-6">
-                <div class="flex gap-4 mb-6">
-                    <button onclick="generateQR()" class="flex-1 bg-blue-600 py-3 rounded-2xl">Generate</button>
-                    <button onclick="downloadQR()" class="flex-1 bg-emerald-600 py-3 rounded-2xl">Download PNG</button>
-                </div>
-                <div id="qrcontainer" class="bg-white p-6 rounded-2xl flex justify-center min-h-[280px]"></div>
-            </div>
-        </div>
-
-        <!-- PASSWORD -->
-        <div id="content2" class="hidden">
-            <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
-                <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6"></div>
-                <div class="grid grid-cols-2 gap-4 text-sm mb-6">
-                    <label><input type="checkbox" id="upper" checked> Uppercase</label>
-                    <label><input type="checkbox" id="lower" checked> Lowercase</label>
-                    <label><input type="checkbox" id="numbers" checked> Numbers</label>
-                    <label><input type="checkbox" id="symbols" checked> Symbols</label>
-                </div>
-                <button onclick="generatePassword()" class="w-full bg-purple-600 py-4 rounded-2xl font-medium mb-3">New Password</button>
-                <button onclick="copyPassword()" class="w-full bg-gray-700 py-4 rounded-2xl font-medium">Copy</button>
-            </div>
-        </div>
-
-        <!-- IMAGE COMPRESSOR -->
-        <div id="content3" class="hidden">
-            <div class="bg-gray-800 rounded-3xl p-8 max-w-2xl mx-auto">
-                <h2 class="text-2xl font-bold mb-6 text-center">Image Compressor</h2>
-                
-                <div id="dropzone" class="drop-zone border-2 border-dashed border-gray-600 rounded-3xl p-12 text-center cursor-pointer hover:border-blue-500 transition">
-                    <i class="fas fa-cloud-upload-alt text-5xl mb-4 text-gray-500"></i>
-                    <p class="text-lg">Drop image here or <span class="text-blue-400">browse</span></p>
-                    <input type="file" id="imageInput" accept="image/*" class="hidden">
-                </div>
-
-                <div id="compressorUI" class="hidden mt-8">
-                    <div class="grid grid-cols-2 gap-6">
-                        <!-- Original -->
-                        <div>
-                            <p class="text-center text-gray-400 mb-2">Original</p>
-                            <img id="originalImg" class="max-h-80 mx-auto rounded-2xl">
-                            <p id="originalSize" class="text-center text-sm text-gray-400 mt-2"></p>
-                        </div>
-                        <!-- Compressed -->
-                        <div>
-                            <p class="text-center text-gray-400 mb-2">Compressed</p>
-                            <img id="compressedImg" class="max-h-80 mx-auto rounded-2xl">
-                            <p id="compressedSize" class="text-center text-sm text-green-400 mt-2"></p>
-                        </div>
-                    </div>
-
-                    <div class="mt-8">
-                        <label class="block text-sm text-gray-400 mb-2">Quality: <span id="qualityValue">80</span>%</label>
-                        <input type="range" id="quality" min="10" max="100" value="80" class="w-full accent-blue-500">
-                    </div>
-
-                    <div class="flex gap-4 mt-6">
-                        <button onclick="compressImage()" class="flex-1 bg-blue-600 py-4 rounded-2xl font-medium">Compress Again</button>
-                        <button onclick="downloadCompressed()" class="flex-1 bg-emerald-600 py-4 rounded-2xl font-medium">Download Compressed Image</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Email Viewer -->
-    <div id="viewer" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
-            <div class="p-6 border-b flex justify-between">
-                <h3 id="viewer-subject" class="font-semibold"></h3>
-                <button onclick="closeViewer()" class="text-2xl">✕</button>
-            </div>
-            <div class="p-6">
-                <div class="text-gray-400">From: <span id="viewer-from" class="font-mono"></span></div>
-                <div id="viewer-time" class="text-gray-400 mb-4"></div>
-                <div id="viewer-body" class="message-body text-gray-200"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // === TEMP MAIL LOGIC (same as before) ===
-        let sidToken = '', currentEmail = '';
-        let timerInterval, inboxInterval, messages = [];
-
-        async function generateCustomEmail() {
-            const username = document.getElementById('username').value.trim() || Math.random().toString(36).substring(2, 10);
-            try {
-                const res = await fetch(`https://api.guerr
+        </
