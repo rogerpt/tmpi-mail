@@ -35,8 +35,7 @@
                     <p class="text-gray-400 text-sm mb-1">Your temporary email</p>
                     <div class="flex items-center gap-3">
                         <code id="email" class="bg-gray-900 px-4 py-3 rounded-xl text-xl font-mono break-all"></code>
-                        <button onclick="copyEmail()" 
-                                class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
+                        <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
                             <i class="fas fa-copy"></i>
                         </button>
                     </div>
@@ -54,12 +53,10 @@
                 <h2 class="font-semibold flex items-center gap-2">
                     <i class="fas fa-inbox"></i> Inbox
                 </h2>
-                <button onclick="refreshInbox()" 
-                        class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
+                <button onclick="refreshInbox()" class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
                     <i class="fas fa-sync"></i> Refresh
                 </button>
             </div>
-
             <div id="inbox" class="email-list divide-y divide-gray-700"></div>
         </div>
 
@@ -85,54 +82,38 @@
 
     <script>
         let currentEmail = '';
-        let currentToken = '';
+        let currentLogin = '';
+        let currentDomain = '';
         let timerInterval;
         let inboxInterval;
         let messages = [];
 
+        const domains = ['1secmail.com', '1secmail.org', '1secmail.net', 'wwjmp.com', 'esiix.com'];
+
         function generateRandomLogin() {
-            return Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 99);
+            return Math.random().toString(36).substring(2, 12);
         }
 
         async function generateNewEmail() {
-            try {
-                const login = generateRandomLogin();
-                const domain = "mail.tm";
+            let success = false;
+            for (let domain of domains) {
+                try {
+                    currentLogin = generateRandomLogin();
+                    currentDomain = domain;
+                    currentEmail = `${currentLogin}@${currentDomain}`;
 
-                // Create account
-                await fetch('https://api.mail.tm/accounts', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        address: `${login}@${domain}`,
-                        password: 'temppass123'
-                    })
-                });
+                    document.getElementById('email').textContent = currentEmail;
+                    messages = [];
+                    updateInbox();
 
-                // Login
-                const loginRes = await fetch('https://api.mail.tm/token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        address: `${login}@${domain}`,
-                        password: 'temppass123'
-                    })
-                });
-
-                const tokenData = await loginRes.json();
-                currentToken = tokenData.token;
-                currentEmail = `${login}@${domain}`;
-
-                document.getElementById('email').textContent = currentEmail;
-                messages = [];
-                updateInbox();
-
-                startTimer();
-                startAutoRefresh();
-
-            } catch (e) {
-                console.error(e);
-                alert("Service is busy. Please click 'New Address' again in 5 seconds.");
+                    startTimer();
+                    startAutoRefresh();
+                    success = true;
+                    break;
+                } catch (e) {}
+            }
+            if (!success) {
+                alert("All services are busy. Please try 'New Address' again in a few seconds.");
             }
         }
 
@@ -144,43 +125,37 @@
                 const min = Math.floor(time / 60).toString().padStart(2, '0');
                 const sec = (time % 60).toString().padStart(2, '0');
                 document.getElementById('timer').textContent = `${min}:${sec}`;
-                if (time <= 0) {
-                    clearInterval(timerInterval);
-                    generateNewEmail();
-                }
+                if (time <= 0) generateNewEmail();
             }, 1000);
         }
 
         async function fetchInbox() {
-            if (!currentToken) return;
+            if (!currentLogin || !currentDomain) return;
             try {
-                const res = await fetch('https://api.mail.tm/messages', {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const res = await fetch(`https://www.1secmail.com/api/v1/?action=getMessages&login=${currentLogin}&domain=${currentDomain}`);
                 const data = await res.json();
-                messages = data['hydra:member'] || [];
+                messages = Array.isArray(data) ? data : [];
                 updateInbox();
             } catch (e) {
-                console.error("Failed to fetch inbox");
+                console.error("Inbox fetch failed");
             }
         }
 
         function updateInbox() {
             const inboxEl = document.getElementById('inbox');
             if (messages.length === 0) {
-                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send an email to <span class="font-mono">${currentEmail}</span></div>`;
+                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send email to <span class="font-mono">${currentEmail}</span></div>`;
                 return;
             }
-
             inboxEl.innerHTML = messages.map(msg => `
-                <div onclick="openMessage('${msg.id}')" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
+                <div onclick="openMessage(${msg.id})" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
                     <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
                         <i class="fas fa-envelope text-blue-400"></i>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex justify-between">
-                            <p class="font-medium truncate">${msg.from.name || msg.from.address}</p>
-                            <p class="text-xs text-gray-500">${new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                            <p class="font-medium truncate">${msg.from}</p>
+                            <p class="text-xs text-gray-500">${new Date(msg.date).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
                         </div>
                         <p class="text-gray-300 truncate">${msg.subject || '(no subject)'}</p>
                     </div>
@@ -190,27 +165,23 @@
 
         async function openMessage(id) {
             try {
-                const res = await fetch(`https://api.mail.tm/messages/${id}`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
+                const res = await fetch(`https://www.1secmail.com/api/v1/?action=readMessage&login=${currentLogin}&domain=${currentDomain}&id=${id}`);
                 const msg = await res.json();
-
-                document.getElementById('viewer-subject').textContent = msg.subject || '(no subject)';
-                document.getElementById('viewer-from').textContent = msg.from.address;
-                document.getElementById('viewer-time').textContent = new Date(msg.createdAt).toLocaleString();
                 
-                const body = msg.html || msg.text || 'No content available.';
-                document.getElementById('viewer-body').innerHTML = body;
-
+                document.getElementById('viewer-subject').textContent = msg.subject || '(no subject)';
+                document.getElementById('viewer-from').textContent = msg.from;
+                document.getElementById('viewer-time').textContent = new Date(msg.date).toLocaleString();
+                document.getElementById('viewer-body').innerHTML = msg.textBody ? msg.textBody.replace(/\n/g, '<br>') : (msg.htmlBody || 'No content');
+                
                 document.getElementById('viewer').classList.remove('hidden');
             } catch (e) {
-                alert("Could not load the message.");
+                alert("Could not open message.");
             }
         }
 
         function startAutoRefresh() {
             if (inboxInterval) clearInterval(inboxInterval);
-            inboxInterval = setInterval(fetchInbox, 4000);
+            inboxInterval = setInterval(fetchInbox, 5000);
         }
 
         function copyEmail() {
@@ -221,19 +192,10 @@
             setTimeout(() => el.style.backgroundColor = orig, 800);
         }
 
-        function refreshInbox() {
-            fetchInbox();
-        }
+        function refreshInbox() { fetchInbox(); }
+        function newEmail() { generateNewEmail(); }
+        function closeViewer() { document.getElementById('viewer').classList.add('hidden'); }
 
-        function newEmail() {
-            generateNewEmail();
-        }
-
-        function closeViewer() {
-            document.getElementById('viewer').classList.add('hidden');
-        }
-
-        // Initialize
         window.onload = () => {
             generateNewEmail();
         };
