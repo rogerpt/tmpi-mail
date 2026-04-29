@@ -1,159 +1,242 @@
-<script>
-    let currentEmail = '';
-    let currentToken = '';        // For Mail.tm authentication
-    let timerInterval;
-    let messages = [];
-    let inboxInterval;
-
-    // Generate random username
-    function generateRandomLogin() {
-        return Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 99);
-    }
-
-    async function generateNewEmail() {
-        try {
-            const login = generateRandomLogin();
-            const domain = "mail.tm";   // You can add more domains later
-
-            // Create account on Mail.tm
-            const regRes = await fetch('https://api.mail.tm/accounts', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    address: `${login}@${domain}`,
-                    password: 'temppass123'
-                })
-            });
-
-            if (!regRes.ok) throw new Error("Failed to create account");
-
-            // Login to get token
-            const loginRes = await fetch('https://api.mail.tm/token', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    address: `${login}@${domain}`,
-                    password: 'temppass123'
-                })
-            });
-
-            const tokenData = await loginRes.json();
-            currentToken = tokenData.token;
-            currentEmail = `${login}@${domain}`;
-
-            document.getElementById('email').textContent = currentEmail;
-            messages = [];
-            updateInbox();
-
-            startTimer();
-            startAutoRefresh();
-
-        } catch (e) {
-            console.error(e);
-            alert("Service is temporarily busy. Try 'New Address' again in a few seconds.");
-        }
-    }
-
-    function startTimer() {
-        clearInterval(timerInterval);
-        let time = 600; // 10 minutes
-        timerInterval = setInterval(() => {
-            time--;
-            const min = Math.floor(time / 60).toString().padStart(2, '0');
-            const sec = (time % 60).toString().padStart(2, '0');
-            document.getElementById('timer').textContent = `${min}:${sec}`;
-            if (time <= 0) {
-                clearInterval(timerInterval);
-                generateNewEmail();
-            }
-        }, 1000);
-    }
-
-    async function fetchInbox() {
-        if (!currentToken) return;
-        try {
-            const res = await fetch('https://api.mail.tm/messages', {
-                headers: { 'Authorization': `Bearer ${currentToken}` }
-            });
-            const data = await res.json();
-            messages = data['hydra:member'] || [];
-            updateInbox();
-        } catch (e) {
-            console.error("Inbox fetch failed");
-        }
-    }
-
-    function updateInbox() {
-        const inboxEl = document.getElementById('inbox');
-        if (messages.length === 0) {
-            inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send mail to <span class="font-mono">${currentEmail}</span></div>`;
-            return;
-        }
-
-        inboxEl.innerHTML = messages.map(msg => `
-            <div onclick="openMessage('${msg.id}')" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
-                <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
-                    <i class="fas fa-envelope text-blue-400"></i>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between">
-                        <p class="font-medium truncate">${msg.from.name || msg.from.address}</p>
-                        <p class="text-xs text-gray-500">${new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
-                    </div>
-                    <p class="text-gray-300 truncate">${msg.subject || '(no subject)'}</p>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TempMail - 10 Minute Disposable Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .email-list { max-height: 60vh; overflow-y: auto; }
+        .message-body { white-space: pre-wrap; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="max-w-4xl mx-auto p-6">
+        <header class="flex items-center justify-between mb-8">
+            <div class="flex items-center gap-3">
+                <i class="fas fa-envelope text-4xl text-blue-500"></i>
+                <div>
+                    <h1 class="text-3xl font-bold">TempMail</h1>
+                    <p class="text-sm text-gray-400">Disposable email • Expires in 10 minutes</p>
                 </div>
             </div>
-        `).join('');
-    }
+            <button onclick="newEmail()" 
+                    class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                <i class="fas fa-plus"></i> New Address
+            </button>
+        </header>
 
-    async function openMessage(id) {
-        try {
-            const res = await fetch(`https://api.mail.tm/messages/${id}`, {
-                headers: { 'Authorization': `Bearer ${currentToken}` }
-            });
-            const msg = await res.json();
+        <!-- Email Address -->
+        <div class="bg-gray-800 rounded-2xl p-6 mb-8 shadow-xl">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div>
+                    <p class="text-gray-400 text-sm mb-1">Your temporary email</p>
+                    <div class="flex items-center gap-3">
+                        <code id="email" class="bg-gray-900 px-4 py-3 rounded-xl text-xl font-mono break-all"></code>
+                        <button onclick="copyEmail()" 
+                                class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
+                    <p class="text-xs text-gray-400">remaining</p>
+                </div>
+            </div>
+        </div>
 
-            document.getElementById('viewer-subject').textContent = msg.subject || '(no subject)';
-            document.getElementById('viewer-from').textContent = msg.from.address;
-            document.getElementById('viewer-time').textContent = new Date(msg.createdAt).toLocaleString();
-            
-            const body = msg.html ? msg.html : (msg.text || 'No content');
-            document.getElementById('viewer-body').innerHTML = body;
+        <!-- Inbox -->
+        <div class="bg-gray-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-6 py-4 border-b border-gray-700 flex items-center justify-between">
+                <h2 class="font-semibold flex items-center gap-2">
+                    <i class="fas fa-inbox"></i> Inbox
+                </h2>
+                <button onclick="refreshInbox()" 
+                        class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
 
-            document.getElementById('viewer').classList.remove('hidden');
-        } catch (e) {
-            alert("Could not load message");
+            <div id="inbox" class="email-list divide-y divide-gray-700"></div>
+        </div>
+
+        <!-- Email Viewer -->
+        <div id="viewer" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+            <div class="bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+                <div class="p-6 border-b border-gray-700 flex justify-between">
+                    <h3 id="viewer-subject" class="font-semibold text-lg"></h3>
+                    <button onclick="closeViewer()" class="text-gray-400 hover:text-white">
+                        <i class="fas fa-times text-2xl"></i>
+                    </button>
+                </div>
+                <div class="p-6 text-sm">
+                    <div class="flex justify-between text-gray-400 mb-4">
+                        <div>From: <span id="viewer-from" class="font-mono"></span></div>
+                        <div id="viewer-time"></div>
+                    </div>
+                    <div id="viewer-body" class="message-body text-gray-200 leading-relaxed"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEmail = '';
+        let currentToken = '';
+        let timerInterval;
+        let inboxInterval;
+        let messages = [];
+
+        function generateRandomLogin() {
+            return Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 99);
         }
-    }
 
-    function startAutoRefresh() {
-        if (inboxInterval) clearInterval(inboxInterval);
-        inboxInterval = setInterval(fetchInbox, 4000); // every 4 seconds
-    }
+        async function generateNewEmail() {
+            try {
+                const login = generateRandomLogin();
+                const domain = "mail.tm";
 
-    // Existing helper functions
-    function copyEmail() {
-        navigator.clipboard.writeText(currentEmail);
-        const el = document.getElementById('email');
-        const orig = el.style.backgroundColor;
-        el.style.backgroundColor = '#166534';
-        setTimeout(() => el.style.backgroundColor = orig, 800);
-    }
+                // Create account
+                await fetch('https://api.mail.tm/accounts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: `${login}@${domain}`,
+                        password: 'temppass123'
+                    })
+                });
 
-    function refreshInbox() {
-        fetchInbox();
-    }
+                // Login
+                const loginRes = await fetch('https://api.mail.tm/token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        address: `${login}@${domain}`,
+                        password: 'temppass123'
+                    })
+                });
 
-    function newEmail() {
-        generateNewEmail();
-    }
+                const tokenData = await loginRes.json();
+                currentToken = tokenData.token;
+                currentEmail = `${login}@${domain}`;
 
-    function closeViewer() {
-        document.getElementById('viewer').classList.add('hidden');
-    }
+                document.getElementById('email').textContent = currentEmail;
+                messages = [];
+                updateInbox();
 
-    // Initialize
-    window.onload = () => {
-        generateNewEmail();
-    };
-</script>
+                startTimer();
+                startAutoRefresh();
+
+            } catch (e) {
+                console.error(e);
+                alert("Service is busy. Please click 'New Address' again in 5 seconds.");
+            }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 600;
+            timerInterval = setInterval(() => {
+                time--;
+                const min = Math.floor(time / 60).toString().padStart(2, '0');
+                const sec = (time % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${min}:${sec}`;
+                if (time <= 0) {
+                    clearInterval(timerInterval);
+                    generateNewEmail();
+                }
+            }, 1000);
+        }
+
+        async function fetchInbox() {
+            if (!currentToken) return;
+            try {
+                const res = await fetch('https://api.mail.tm/messages', {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                const data = await res.json();
+                messages = data['hydra:member'] || [];
+                updateInbox();
+            } catch (e) {
+                console.error("Failed to fetch inbox");
+            }
+        }
+
+        function updateInbox() {
+            const inboxEl = document.getElementById('inbox');
+            if (messages.length === 0) {
+                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send an email to <span class="font-mono">${currentEmail}</span></div>`;
+                return;
+            }
+
+            inboxEl.innerHTML = messages.map(msg => `
+                <div onclick="openMessage('${msg.id}')" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
+                    <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-envelope text-blue-400"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between">
+                            <p class="font-medium truncate">${msg.from.name || msg.from.address}</p>
+                            <p class="text-xs text-gray-500">${new Date(msg.createdAt).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                        </div>
+                        <p class="text-gray-300 truncate">${msg.subject || '(no subject)'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openMessage(id) {
+            try {
+                const res = await fetch(`https://api.mail.tm/messages/${id}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+                const msg = await res.json();
+
+                document.getElementById('viewer-subject').textContent = msg.subject || '(no subject)';
+                document.getElementById('viewer-from').textContent = msg.from.address;
+                document.getElementById('viewer-time').textContent = new Date(msg.createdAt).toLocaleString();
+                
+                const body = msg.html || msg.text || 'No content available.';
+                document.getElementById('viewer-body').innerHTML = body;
+
+                document.getElementById('viewer').classList.remove('hidden');
+            } catch (e) {
+                alert("Could not load the message.");
+            }
+        }
+
+        function startAutoRefresh() {
+            if (inboxInterval) clearInterval(inboxInterval);
+            inboxInterval = setInterval(fetchInbox, 4000);
+        }
+
+        function copyEmail() {
+            navigator.clipboard.writeText(currentEmail);
+            const el = document.getElementById('email');
+            const orig = el.style.backgroundColor;
+            el.style.backgroundColor = '#166534';
+            setTimeout(() => el.style.backgroundColor = orig, 800);
+        }
+
+        function refreshInbox() {
+            fetchInbox();
+        }
+
+        function newEmail() {
+            generateNewEmail();
+        }
+
+        function closeViewer() {
+            document.getElementById('viewer').classList.add('hidden');
+        }
+
+        // Initialize
+        window.onload = () => {
+            generateNewEmail();
+        };
+    </script>
+</body>
+</html>
