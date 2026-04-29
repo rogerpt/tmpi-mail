@@ -1,9 +1,6 @@
 {
   "cleanUrls": true,
   "trailingSlash": false,
-  "static": {
-    "directory": "."
-  },
   "routes": [
     { "src": "/about", "dest": "/about.html" },
     { "src": "/about.html", "dest": "/about.html" },
