@@ -8,18 +8,18 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
-        .email-list { max-height: 65vh; overflow-y: auto; }
+        .email-list { max-height: 60vh; overflow-y: auto; }
         .message-body { white-space: pre-wrap; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
-    <div class="max-w-4xl mx-auto p-6">
+    <div class="max-w-5xl mx-auto p-6">
         <header class="flex items-center justify-between mb-8">
             <div class="flex items-center gap-3">
                 <i class="fas fa-envelope text-4xl text-blue-500"></i>
                 <div>
                     <h1 class="text-3xl font-bold">TempMail</h1>
-                    <p class="text-sm text-gray-400">Instant disposable email • Powered by Guerrilla Mail</p>
+                    <p class="text-sm text-gray-400">Instant disposable email</p>
                 </div>
             </div>
             <button onclick="newEmail()" 
@@ -28,24 +28,55 @@
             </button>
         </header>
 
-        <!-- Email Address -->
+        <!-- Controls -->
         <div class="bg-gray-800 rounded-2xl p-6 mb-8 shadow-xl">
-            <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-                <div class="flex-1">
-                    <p class="text-gray-400 text-sm mb-1">Your temporary email</p>
-                    <div class="flex items-center gap-3">
-                        <code id="email" class="bg-gray-900 px-4 py-3 rounded-xl text-xl font-mono break-all flex-1"></code>
-                        <button onclick="copyEmail()" 
-                                class="bg-gray-700 hover:bg-gray-600 p-3 rounded-xl">
-                            <i class="fas fa-copy"></i>
-                        </button>
-                    </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Custom Username -->
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">Username</label>
+                    <input id="username" type="text" placeholder="yourname" 
+                           class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500">
                 </div>
-                <div class="text-center">
-                    <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
-                    <p class="text-xs text-gray-400">remaining</p>
+                
+                <!-- Domain Selector -->
+                <div>
+                    <label class="text-gray-400 text-sm block mb-1">Domain</label>
+                    <select id="domain" 
+                            class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-blue-500">
+                        <option value="guerrillamail.com">guerrillamail.com</option>
+                        <option value="sharklasers.com">sharklasers.com</option>
+                        <option value="grr.la">grr.la</option>
+                        <option value="guerrillamail.net">guerrillamail.net</option>
+                        <option value="guerrillamail.org">guerrillamail.org</option>
+                    </select>
+                </div>
+
+                <div class="flex items-end">
+                    <button onclick="generateCustomEmail()" 
+                            class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium flex items-center justify-center gap-2">
+                        <i class="fas fa-check"></i> Generate Email
+                    </button>
                 </div>
             </div>
+
+            <!-- Email Display -->
+            <div class="mt-6 flex items-center gap-3">
+                <code id="email" class="bg-gray-900 px-5 py-4 rounded-xl text-xl font-mono break-all flex-1"></code>
+                <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl">
+                    <i class="fas fa-copy"></i>
+                </button>
+            </div>
+
+            <div class="text-center mt-4">
+                <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
+                <p class="text-xs text-gray-400">remaining</p>
+            </div>
+        </div>
+
+        <!-- AdSense Top Banner Placeholder -->
+        <!-- Paste your AdSense code here (728x90 or responsive) -->
+        <div class="my-6 bg-gray-800 border border-dashed border-gray-600 rounded-2xl p-4 text-center text-gray-500 text-sm">
+            [ AdSense Leaderboard Banner - 728×90 ]
         </div>
 
         <!-- Inbox -->
@@ -54,13 +85,15 @@
                 <h2 class="font-semibold flex items-center gap-2">
                     <i class="fas fa-inbox"></i> Inbox
                 </h2>
-                <button onclick="refreshInbox()" 
-                        class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
+                <button onclick="refreshInbox()" class="text-blue-400 hover:text-blue-300 flex items-center gap-2 text-sm">
                     <i class="fas fa-sync"></i> Refresh
                 </button>
             </div>
             <div id="inbox" class="email-list divide-y divide-gray-700"></div>
         </div>
+
+        <!-- Sidebar / In-content Ad Placeholder -->
+        <!-- You can place 300x250 ads here later -->
     </div>
 
     <!-- Email Viewer -->
@@ -71,11 +104,11 @@
                 <button onclick="closeViewer()" class="text-gray-400 hover:text-white text-2xl">✕</button>
             </div>
             <div class="p-6 text-sm">
-                <div class="flex justify-between text-gray-400 mb-4 text-sm">
+                <div class="flex justify-between text-gray-400 mb-4">
                     <div>From: <span id="viewer-from" class="font-mono"></span></div>
                     <div id="viewer-time"></div>
                 </div>
-                <div id="viewer-body" class="message-body text-gray-200 leading-relaxed prose prose-invert max-w-none"></div>
+                <div id="viewer-body" class="message-body text-gray-200 leading-relaxed"></div>
             </div>
         </div>
     </div>
@@ -87,13 +120,20 @@
         let inboxInterval;
         let messages = [];
 
-        async function generateNewEmail() {
+        const domains = ["guerrillamail.com", "sharklasers.com", "grr.la", "guerrillamail.net", "guerrillamail.org"];
+
+        async function generateCustomEmail() {
+            const usernameInput = document.getElementById('username').value.trim();
+            const selectedDomain = document.getElementById('domain').value;
+            
+            let username = usernameInput || Math.random().toString(36).substring(2, 10);
+            
             try {
-                const res = await fetch('https://api.guerrillamail.com/ajax.php?f=get_email_address&lang=en');
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=set_email_user&email_user=${username}&lang=en`);
                 const data = await res.json();
                 
                 sidToken = data.sid_token;
-                currentEmail = data.email_addr;
+                currentEmail = data.email_addr || `${username}@${selectedDomain}`;
 
                 document.getElementById('email').textContent = currentEmail;
                 messages = [];
@@ -102,7 +142,7 @@
                 startTimer();
                 startAutoRefresh();
             } catch (e) {
-                alert("Service busy. Please try again in a few seconds.");
+                alert("Service busy. Try again or use random.");
             }
         }
 
@@ -114,7 +154,7 @@
                 const min = Math.floor(time / 60).toString().padStart(2, '0');
                 const sec = (time % 60).toString().padStart(2, '0');
                 document.getElementById('timer').textContent = `${min}:${sec}`;
-                if (time <= 0) generateNewEmail();
+                if (time <= 0) generateCustomEmail();
             }, 1000);
         }
 
@@ -131,7 +171,7 @@
         function updateInbox() {
             const inboxEl = document.getElementById('inbox');
             if (messages.length === 0) {
-                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send an email to <span class="font-mono">${currentEmail}</span></div>`;
+                inboxEl.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send to <span class="font-mono">${currentEmail}</span></div>`;
                 return;
             }
             inboxEl.innerHTML = messages.map(msg => `
@@ -172,21 +212,20 @@
         }
 
         function copyEmail() {
-            navigator.clipboard.writeText(currentEmail).then(() => {
-                const el = document.getElementById('email');
-                const orig = el.style.backgroundColor;
-                el.style.backgroundColor = '#166534';
-                setTimeout(() => el.style.backgroundColor = orig, 700);
-            });
+            navigator.clipboard.writeText(currentEmail);
+            const el = document.getElementById('email');
+            const orig = el.style.backgroundColor;
+            el.style.backgroundColor = '#166534';
+            setTimeout(() => el.style.backgroundColor = orig, 700);
         }
 
         function refreshInbox() { fetchInbox(); }
-        function newEmail() { generateNewEmail(); }
+        function newEmail() { generateCustomEmail(); }
         function closeViewer() { document.getElementById('viewer').classList.add('hidden'); }
 
-        // Start the app
+        // Initialize with random email
         window.onload = () => {
-            generateNewEmail();
+            generateCustomEmail();
         };
     </script>
 </body>
