@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Free temporary email, QR code generator, password generator, image compressor, text tools and more. No signup required.">
+    <meta name="keywords" content="temp mail, temporary email, qr code, password generator, image compressor, free online tools">
+    <title>TempTools - Free Online Utilities & Temporary Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body { font-family: system-ui, -apple-system, sans-serif; }
+        .email-list { max-height: 55vh; overflow-y: auto; }
+        .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
+        .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s; }
+        .nav-link { transition: all 0.2s; }
+        .nav-link:hover { color: #60a5fa; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+
+    <!-- Navigation -->
+<!-- Navigation -->
+<nav class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-tools text-3xl text-blue-500"></i>
+            <h1 class="text-2xl font-bold">TempTools</h1>
+        </div>
+        <div class="flex items-center gap-8 text-sm font-medium">
+            <a href="/about/" class="nav-link ...">About</a>
+            <a href="/faq/" class="nav-link ...">FAQ</a>
+            <a href="/privacy/" class="nav-link ...">Privacy</a>
+            <a href="/terms/" class="nav-link ...">Terms</a>
+        </div>
+    </div>
+</nav>
+
+    <div class="max-w-6xl mx-auto p-6">
+
+        <!-- AdSense Placeholder -->
+        <div class="my-6 bg-gray-800 border border-dashed border-gray-600 rounded-2xl p-4 text-center text-gray-500 min-h-[90px] flex items-center justify-center">
+            [ AdSense Leaderboard Banner - 728×90 ]
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-700 mb-8 overflow-x-auto">
+            <button onclick="switchTab(0)" class="tab-active px-6 py-4 text-lg whitespace-nowrap" id="tab0">📧 Temp Mail</button>
+            <button onclick="switchTab(1)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab1">🔲 QR Code</button>
+            <button onclick="switchTab(2)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab2">🔑 Password</button>
+            <button onclick="switchTab(3)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab3">🖼️ Compressor</button>
+            <button onclick="switchTab(4)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab4">📝 Text Tools</button>
+        </div>
+
+        <!-- TEMP MAIL -->
+        <div id="content0">
+            <div class="bg-gray-800 rounded-2xl p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="text-gray-400 text-sm block mb-1">Username</label>
+                        <input id="username" type="text" placeholder="yourname" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 text-sm block mb-1">Domain</label>
+                        <select id="domain" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
+                            <option value="guerrillamail.com">guerrillamail.com</option>
+                            <option value="sharklasers.com">sharklasers.com</option>
+                            <option value="grr.la">grr.la</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="generateCustomEmail()" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium">Generate Email</button>
+                    </div>
+                </div>
+                <div class="mt-6 flex gap-3">
+                    <code id="email" class="bg-gray-900 px-5 py-4 rounded-xl text-xl font-mono flex-1"></code>
+                    <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl"><i class="fas fa-copy"></i></button>
+                </div>
+                <div class="text-center mt-4">
+                    <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
+                </div>
+            </div>
+            <div class="bg-gray-800 rounded-2xl overflow-hidden">
+                <div class="px-6 py-4 border-b flex justify-between">
+                    <h2 class="font-semibold">Inbox</h2>
+                    <button onclick="refreshInbox()" class="text-blue-400">Refresh</button>
+                </div>
+                <div id="inbox" class="email-list divide-y divide-gray-700"></div>
+            </div>
+        </div>
+
+        <!-- QR CODE -->
+        <div id="content1" class="hidden">
+            <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">QR Code Generator</h2>
+                <input id="qrtext" type="text" placeholder="Enter text or URL..." class="w-full bg-gray-900 border border-gray-700 rounded-2xl px-5 py-4 mb-6">
+                <div class="flex gap-4 mb-6">
+                    <button onclick="generateQR()" class="flex-1 bg-blue-600 py-3 rounded-2xl">Generate</button>
+                    <button onclick="downloadQR()" class="flex-1 bg-emerald-600 py-3 rounded-2xl">Download PNG</button>
+                </div>
+                <div id="qrcontainer" class="bg-white p-6 rounded-2xl flex justify-center min-h-[280px]"></div>
+            </div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div id="content2" class="hidden">
+            <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
+                <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6"></div>
+                <div class="grid grid-cols-2 gap-4 text-sm mb-6">
+                    <label><input type="checkbox" id="upper" checked> Uppercase</label>
+                    <label><input type="checkbox" id="lower" checked> Lowercase</label>
+                    <label><input type="checkbox" id="numbers" checked> Numbers</label>
+                    <label><input type="checkbox" id="symbols" checked> Symbols</label>
+                </div>
+                <button onclick="generatePassword()" class="w-full bg-purple-600 py-4 rounded-2xl font-medium mb-3">New Password</button>
+                <button onclick="copyPassword()" class="w-full bg-gray-700 py-4 rounded-2xl font-medium">Copy Password</button>
+            </div>
+        </div>
+
+        <!-- IMAGE COMPRESSOR -->
+        <div id="content3" class="hidden">
+            <div class="bg-gray-800 rounded-3xl p-8 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">Image Compressor</h2>
+                <div id="dropzone" class="drop-zone border-2 border-dashed border-gray-600 rounded-3xl p-12 text-center cursor-pointer hover:border-blue-500">
+                    <i class="fas fa-cloud-upload-alt text-5xl mb-4 text-gray-500"></i>
+                    <p class="text-lg">Drop image here or <span class="text-blue-400">browse</span></p>
+                    <input type="file" id="imageInput" accept="image/*" class="hidden">
+                </div>
+                <div id="compressorUI" class="hidden mt-8">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <p class="text-center text-gray-400 mb-2">Original</p>
+                            <img id="originalImg" class="max-h-80 mx-auto rounded-2xl">
+                            <p id="originalSize" class="text-center text-sm text-gray-400 mt-2"></p>
+                        </div>
+                        <div>
+                            <p class="text-center text-gray-400 mb-2">Compressed</p>
+                            <img id="compressedImg" class="max-h-80 mx-auto rounded-2xl">
+                            <p id="compressedSize" class="text-center text-sm text-green-400 mt-2"></p>
+                        </div>
+                    </div>
+                    <div class="mt-8">
+                        <label class="block text-sm text-gray-400 mb-2">Quality: <span id="qualityValue">80</span>%</label>
+                        <input type="range" id="quality" min="10" max="100" value="80" class="w-full accent-blue-500" oninput="compressImage()">
+                    </div>
+                    <div class="flex gap-4 mt-6">
+                        <button onclick="compressImage()" class="flex-1 bg-blue-600 py-4 rounded-2xl font-medium">Re-compress</button>
+                        <button onclick="downloadCompressed()" class="flex-1 bg-emerald-600 py-4 rounded-2xl font-medium">Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEXT TOOLS -->
+        <div id="content4" class="hidden">
+            <div class="bg-gray-800 rounded-3xl p-8 max-w-2xl mx-auto">
+                <h2 class="text-2xl font-bold mb-6 text-center">Text Tools</h2>
+                <textarea id="textinput" rows="8" class="w-full bg-gray-900 border border-gray-700 rounded-2xl p-5 text-gray-200" placeholder="Paste your text here..."></textarea>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+                    <button onclick="countText()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">Count Words</button>
+                    <button onclick="toUpper()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">UPPERCASE</button>
+                    <button onclick="toLower()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">lowercase</button>
+                    <button onclick="copyText()" class="bg-emerald-600 py-3 rounded-xl hover:bg-emerald-700">Copy Text</button>
+                </div>
+                <div id="textresult" class="mt-6 p-5 bg-gray-900 rounded-2xl text-sm min-h-[60px]"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Viewer -->
+    <div id="viewer" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50">
+        <div class="bg-gray-800 rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <div class="p-6 border-b flex justify-between">
+                <h3 id="viewer-subject" class="font-semibold"></h3>
+                <button onclick="closeViewer()" class="text-2xl">✕</button>
+            </div>
+            <div class="p-6">
+                <div class="text-gray-400">From: <span id="viewer-from" class="font-mono"></span></div>
+                <div id="viewer-time" class="text-gray-400 mb-4"></div>
+                <div id="viewer-body" class="message-body text-gray-200"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-950 border-t border-gray-800 py-10 mt-16">
+        <div class="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm">
+            © 2026 TempTools. All Rights Reserved.<br><br>
+            <div class="flex flex-wrap justify-center gap-6 text-xs">
+                <a href="about.html" class="hover:text-gray-300">About</a>
+                <a href="faq.html" class="hover:text-gray-300">FAQ</a>
+                <a href="privacy.html" class="hover:text-gray-300">Privacy Policy</a>
+                <a href="terms.html" class="hover:text-gray-300">Terms of Service</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // === ALL YOUR JAVASCRIPT (unchanged) ===
+        let sidToken = '', currentEmail = '';
+        let timerInterval, inboxInterval, messages = [];
+
+        async function generateCustomEmail() {
+            const username = document.getElementById('username').value.trim() || Math.random().toString(36).substring(2, 10);
+            try {
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=set_email_user&email_user=${username}&lang=en`);
+                const data = await res.json();
+                sidToken = data.sid_token;
+                currentEmail = data.email_addr;
+                document.getElementById('email').textContent = currentEmail;
+                startTimer();
+                startAutoRefresh();
+            } catch (e) { alert("Service busy. Try again."); }
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 600;
+            timerInterval = setInterval(() => {
+                time--;
+                const min = Math.floor(time / 60).toString().padStart(2, '0');
+                const sec = (time % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${min}:${sec}`;
+                if (time <= 0) generateCustomEmail();
+            }, 1000);
+        }
+
+        async function fetchInbox() {
+            if (!sidToken) return;
+            try {
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&lang=en&sid_token=${sidToken}`);
+                const data = await res.json();
+                messages = data.list || [];
+                updateInbox();
+            } catch (e) {}
+        }
+
+        function updateInbox() {
+            const el = document.getElementById('inbox');
+            if (messages.length === 0) {
+                el.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send to <span class="font-mono">${currentEmail}</span></div>`;
+                return;
+            }
+            el.innerHTML = messages.map(m => `
+                <div onclick="openMessage('${m.mail_id}')" class="px-6 py-4 hover:bg-gray-700 cursor-pointer flex gap-4">
+                    <div class="w-10 h-10 bg-blue-900 rounded-full flex items-center justify-center"><i class="fas fa-envelope text-blue-400"></i></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between">
+                            <p class="font-medium truncate">${m.mail_from}</p>
+                            <p class="text-xs text-gray-500">${new Date(m.mail_timestamp * 1000).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</p>
+                        </div>
+                        <p class="text-gray-300 truncate">${m.mail_subject || '(no subject)'}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function openMessage(mailId) {
+            try {
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=fetch_email&email_id=${mailId}&lang=en&sid_token=${sidToken}`);
+                const msg = await res.json();
+                document.getElementById('viewer-subject').textContent = msg.mail_subject || '(no subject)';
+                document.getElementById('viewer-from').textContent = msg.mail_from;
+                document.getElementById('viewer-time').textContent = new Date(msg.mail_timestamp * 1000).toLocaleString();
+                document.getElementById('viewer-body').innerHTML = msg.mail_body || 'No content';
+                document.getElementById('viewer').classList.remove('hidden');
+            } catch (e) { alert("Could not load message"); }
+        }
+
+        function startAutoRefresh() {
+            clearInterval(inboxInterval);
+            inboxInterval = setInterval(fetchInbox, 4000);
+        }
+
+        function copyEmail() { navigator.clipboard.writeText(currentEmail); }
+        function refreshInbox() { fetchInbox(); }
+        function closeViewer() { document.getElementById('viewer').classList.add('hidden'); }
+
+        // Tab Switching
+        function switchTab(n) {
+            document.querySelectorAll('[id^="content"]').forEach(el => el.classList.add('hidden'));
+            document.getElementById('content' + n).classList.remove('hidden');
+            
+            document.querySelectorAll('button[id^="tab"]').forEach(el => el.classList.remove('tab-active'));
+            document.getElementById('tab' + n).classList.add('tab-active');
+        }
+
+        // QR Code
+        let currentQR = null;
+        function generateQR() {
+            const text = document.getElementById('qrtext').value.trim() || "https://temptools.vercel.app";
+            document.getElementById('qrcontainer').innerHTML = '';
+            currentQR = new QRCode(document.getElementById('qrcontainer'), { text: text, width: 280, height: 280 });
+        }
+        function downloadQR() {
+            if (!currentQR) return;
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = document.querySelector('#qrcontainer canvas').toDataURL();
+            link.click();
+        }
+
+        // Password
+        function generatePassword() {
+            const length = 16;
+            let chars = '';
+            if (document.getElementById('upper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (document.getElementById('lower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
+            if (document.getElementById('numbers').checked) chars += '0123456789';
+            if (document.getElementById('symbols').checked) chars += '!@#$%^&*()';
+            let pass = '';
+            for (let i = 0; i < length; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('password').textContent = pass;
+        }
+        function copyPassword() {
+            const pass = document.getElementById('password').textContent;
+            if (pass) navigator.clipboard.writeText(pass);
+        }
+
+        // Image Compressor
+        let originalFile = null;
+        let compressedDataUrl = null;
+        const dropzone = document.getElementById('dropzone');
+        const imageInput = document.getElementById('imageInput');
+
+        dropzone.addEventListener('click', () => imageInput.click());
+        imageInput.addEventListener('change', e => { if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+        dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('border-blue-500'); });
+        dropzone.addEventListener('dragleave', () => dropzone.classList.remove('border-blue-500'));
+        dropzone.addEventListener('drop', e => {
+            e.preventDefault();
+            dropzone.classList.remove('border-blue-500');
+            if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return alert("Please upload an image");
+            originalFile = file;
+            document.getElementById('compressorUI').classList.remove('hidden');
+            document.getElementById('originalImg').src = URL.createObjectURL(file);
+            document.getElementById('originalSize').textContent = `Size: ${(file.size / 1024).toFixed(1)} KB`;
+            compressImage();
+        }
+
+        function compressImage() {
+            const quality = document.getElementById('quality').value / 100;
+            document.getElementById('qualityValue').textContent = document.getElementById('quality').value;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+            img.onload = () => {
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                compressedDataUrl = canvas.toDataURL('image/jpeg', quality);
+                document.getElementById('compressedImg').src = compressedDataUrl;
+                const sizeKB = Math.round((compressedDataUrl.length * 0.75) / 1024);
+                document.getElementById('compressedSize').textContent = `Size: ${sizeKB} KB`;
+            };
+            img.src = URL.createObjectURL(originalFile);
+        }
+
+        function downloadCompressed() {
+            if (!compressedDataUrl) return;
+            const a = document.createElement('a');
+            a.href = compressedDataUrl;
+            a.download = 'compressed-' + originalFile.name;
+            a.click();
+        }
+
+        // Text Tools
+        function countText() {
+            const text = document.getElementById('textinput').value.trim();
+            const words = text.split(/\s+/).filter(Boolean).length;
+            const chars = text.length;
+            document.getElementById('textresult').innerHTML = `<strong>Words:</strong> ${words} | <strong>Characters:</strong> ${chars} | <strong>No spaces:</strong> ${text.replace(/\s/g,'').length}`;
+        }
+        function toUpper() { document.getElementById('textinput').value = document.getElementById('textinput').value.toUpperCase(); }
+        function toLower() { document.getElementById('textinput').value = document.getElementById('textinput').value.toLowerCase(); }
+        function copyText() { navigator.clipboard.writeText(document.getElementById('textinput').value); }
+
+        // Initialize
+        window.onload = () => {
+            generateCustomEmail();
+            generatePassword();
+            generateQR();
+            switchTab(0);   // Start on Temp Mail tab
+        };
+    </script>
+</body>
+</html>
