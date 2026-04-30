@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free temporary email, QR code generator, password generator, image compressor, text tools and more. No signup required.">
-    <meta name="keywords" content="temp mail, temporary email, qr code, password generator, image compressor, free online tools">
+    <meta name="description" content="Free temporary email, QR code, password generator, image compressor and more. No signup required.">
     <title>TempTools - Free Online Utilities</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; }
-        .email-list { max-height: 55vh; overflow-y: auto; }
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+        .nav-link { transition: all 0.2s; }
+        .nav-link:hover { color: #60a5fa; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
-        .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -27,41 +27,54 @@
                 <h1 class="text-2xl font-bold">TempTools</h1>
             </div>
             <div class="flex items-center gap-8 text-sm font-medium">
-                <a href="/" class="nav-link text-white">🛠 Tools</a>
-                <a href="/about/" class="nav-link text-gray-300 hover:text-white">About</a>
-                <a href="/faq/" class="nav-link text-gray-300 hover:text-white">FAQ</a>
-                <a href="/privacy/" class="nav-link text-gray-300 hover:text-white">Privacy</a>
-                <a href="/terms/" class="nav-link text-gray-300 hover:text-white">Terms</a>
+                <a href="#" onclick="showSection('home')" class="nav-link text-white">🛠 Tools</a>
+                <a href="#" onclick="showSection('about')" class="nav-link text-gray-300 hover:text-white">About</a>
+                <a href="#" onclick="showSection('faq')" class="nav-link text-gray-300 hover:text-white">FAQ</a>
+                <a href="#" onclick="showSection('privacy')" class="nav-link text-gray-300 hover:text-white">Privacy</a>
+                <a href="#" onclick="showSection('terms')" class="nav-link text-gray-300 hover:text-white">Terms</a>
             </div>
         </div>
     </nav>
 
-    <!-- Rest of your site content (same as before) -->
     <div class="max-w-6xl mx-auto p-6">
-        <!-- AdSense Placeholder -->
-        <div class="my-6 bg-gray-800 border border-dashed border-gray-600 rounded-2xl p-4 text-center text-gray-500 min-h-[90px]">
-            [ AdSense Banner ]
+
+        <!-- HOME / TOOLS -->
+        <div id="home" class="content-section active">
+            <!-- Put all your tools (Temp Mail, QR, Password, etc.) here -->
+            <!-- I'll include a placeholder - you can paste your full tool code here -->
+            <h2 class="text-3xl font-bold mb-8 text-center">Free Online Tools</h2>
+            <p class="text-center text-gray-400 mb-12">Choose a tool below</p>
+            
+            <!-- You can paste your previous tool tabs and content here -->
+            <!-- For now, just a simple message -->
+            <div class="bg-gray-800 rounded-3xl p-12 text-center">
+                <p class="text-xl">All tools are ready. Paste your tool sections here.</p>
+            </div>
         </div>
 
-        <!-- Tabs and all tools content here... (I kept it short for now) -->
-        <!-- Paste all your previous tool content (content0 to content4) here -->
+        <!-- ABOUT -->
+        <div id="about" class="content-section">
+            <div class="max-w-3xl mx-auto prose prose-invert">
+                <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
+                <p class="text-lg text-gray-300">Free, fast, and privacy-friendly collection of online utilities.</p>
+                <!-- Paste your previous About content here -->
+            </div>
+        </div>
+
+        <!-- FAQ, PRIVACY, TERMS will be added below if you want -->
 
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-950 border-t border-gray-800 py-10">
-        <div class="max-w-6xl mx-auto px-6 text-center text-gray-500 text-sm">
-            © 2026 TempTools • 
-            <a href="/about/" class="hover:text-gray-300">About</a> • 
-            <a href="/faq/" class="hover:text-gray-300">FAQ</a> • 
-            <a href="/privacy/" class="hover:text-gray-300">Privacy</a> • 
-            <a href="/terms/" class="hover:text-gray-300">Terms</a>
-        </div>
-    </footer>
-
     <script>
-        // Your full JavaScript code here (same as previous version)
-        // ... paste all your script ...
+        function showSection(section) {
+            document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+        }
+
+        // Initialize
+        window.onload = () => {
+            showSection('home');
+        };
     </script>
 </body>
 </html>
