@@ -43,7 +43,7 @@
                 <button onclick="switchTab(4)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab4">📝 Text Tools</button>
             </div>
 
-            <!-- Temp Mail -->
+            <!-- 1. Temp Mail -->
             <div id="content0">
                 <div class="bg-gray-800 rounded-2xl p-6 mb-8">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -78,7 +78,7 @@
                 </div>
             </div>
 
-            <!-- QR Code -->
+            <!-- 2. QR Code -->
             <div id="content1" class="hidden">
                 <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
                     <h2 class="text-2xl font-bold mb-6 text-center">QR Code Generator</h2>
@@ -91,12 +91,11 @@
                 </div>
             </div>
 
-            <!-- Password Generator (with options) -->
+            <!-- 3. Password -->
             <div id="content2" class="hidden">
                 <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
                     <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
                     <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6 min-h-[70px]"></div>
-                    
                     <div class="mb-6">
                         <label class="block text-sm text-gray-400 mb-2">Length: <span id="lengthValue">16</span></label>
                         <input type="range" id="length" min="8" max="32" value="16" class="w-full accent-blue-500" oninput="updateLength()">
@@ -112,12 +111,51 @@
                 </div>
             </div>
 
-            <!-- Image Compressor & Text Tools can be added if needed -->
+            <!-- 4. Image Compressor -->
+            <div id="content3" class="hidden">
+                <div class="bg-gray-800 rounded-3xl p-8 max-w-2xl mx-auto">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Image Compressor</h2>
+                    <div id="dropzone" class="drop-zone border-2 border-dashed border-gray-600 rounded-3xl p-12 text-center cursor-pointer hover:border-blue-500">
+                        <i class="fas fa-cloud-upload-alt text-5xl mb-4 text-gray-500"></i>
+                        <p class="text-lg">Drop image here or click to browse</p>
+                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                    </div>
+                    <div id="compressorUI" class="hidden mt-8">
+                        <div class="grid grid-cols-2 gap-6">
+                            <div>
+                                <p class="text-center text-gray-400 mb-2">Original</p>
+                                <img id="originalImg" class="max-h-64 mx-auto rounded-2xl">
+                            </div>
+                            <div>
+                                <p class="text-center text-gray-400 mb-2">Compressed</p>
+                                <img id="compressedImg" class="max-h-64 mx-auto rounded-2xl">
+                            </div>
+                        </div>
+                        <button onclick="downloadCompressed()" class="mt-8 w-full bg-emerald-600 py-4 rounded-2xl">Download Compressed Image</button>
+                    </div>
+                </div>
+            </div>
 
+            <!-- 5. Text Tools -->
+            <div id="content4" class="hidden">
+                <div class="bg-gray-800 rounded-3xl p-8 max-w-2xl mx-auto">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Text Tools</h2>
+                    <textarea id="textinput" rows="8" class="w-full bg-gray-900 border border-gray-700 rounded-2xl p-5 text-gray-200" placeholder="Paste your text here..."></textarea>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+                        <button onclick="countText()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">Count Words</button>
+                        <button onclick="toUpper()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">UPPERCASE</button>
+                        <button onclick="toLower()" class="bg-gray-700 py-3 rounded-xl hover:bg-gray-600">lowercase</button>
+                        <button onclick="copyText()" class="bg-emerald-600 py-3 rounded-xl hover:bg-emerald-700">Copy Text</button>
+                    </div>
+                    <div id="textresult" class="mt-6 p-5 bg-gray-900 rounded-2xl text-sm min-h-[60px]"></div>
+                </div>
+            </div>
         </div>
 
+        <!-- About -->
         <div id="about" class="content-section">
-            <h1 class="text-4xl font-bold">About TempTools</h1>
+            <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
+            <p class="text-gray-300">Free, fast, and privacy-friendly online utilities.</p>
         </div>
     </div>
 
@@ -151,9 +189,7 @@
             if (chars === '') chars = 'abcdefghijklmnopqrstuvwxyz';
 
             let pass = '';
-            for (let i = 0; i < length; i++) {
-                pass += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+            for (let i = 0; i < length; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
             document.getElementById('password').textContent = pass;
         }
 
@@ -177,6 +213,42 @@
             link.href = document.querySelector('#qrcontainer canvas').toDataURL();
             link.click();
         }
+
+        // Image Compressor
+        let originalFile = null;
+        const dropzone = document.getElementById('dropzone');
+        const imageInput = document.getElementById('imageInput');
+
+        dropzone.addEventListener('click', () => imageInput.click());
+        imageInput.addEventListener('change', e => {
+            if (e.target.files[0]) handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) return alert("Please upload an image");
+            originalFile = file;
+            document.getElementById('compressorUI').classList.remove('hidden');
+            document.getElementById('originalImg').src = URL.createObjectURL(file);
+            document.getElementById('compressedImg').src = URL.createObjectURL(file);
+        }
+
+        function downloadCompressed() {
+            if (!originalFile) return;
+            const link = document.createElement('a');
+            link.download = 'compressed-' + originalFile.name;
+            link.href = document.getElementById('compressedImg').src;
+            link.click();
+        }
+
+        // Text Tools
+        function countText() {
+            const text = document.getElementById('textinput').value.trim();
+            const words = text.split(/\s+/).filter(Boolean).length;
+            document.getElementById('textresult').innerHTML = `<strong>Words:</strong> ${words} | <strong>Characters:</strong> ${text.length}`;
+        }
+        function toUpper() { document.getElementById('textinput').value = document.getElementById('textinput').value.toUpperCase(); }
+        function toLower() { document.getElementById('textinput').value = document.getElementById('textinput').value.toLowerCase(); }
+        function copyText() { navigator.clipboard.writeText(document.getElementById('textinput').value); }
 
         // Initialize
         window.onload = () => {
