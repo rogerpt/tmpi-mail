@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free temporary email, QR code, password generator and more.">
+    <meta name="description" content="Free temporary email, QR code, password generator. No signup required.">
     <title>TempTools - Free Online Utilities</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -98,10 +98,10 @@
             </div>
         </div>
 
-        <!-- About -->
+        <!-- ABOUT -->
         <div id="about" class="content-section">
             <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
-            <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities.</p>
+            <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities built for everyday use.</p>
             <h2 class="text-2xl font-semibold mt-10 mb-4">Our Mission</h2>
             <p class="text-gray-300">We believe everyone should have access to simple, powerful tools without creating accounts, paying fees, or compromising their privacy.</p>
         </div>
@@ -109,14 +109,18 @@
         <!-- FAQ -->
         <div id="faq" class="content-section">
             <h1 class="text-4xl font-bold mb-10">Frequently Asked Questions</h1>
-            <div class="space-y-8">
+            <div class="space-y-8 max-w-3xl">
                 <div>
-                    <h3 class="text-xl font-semibold mb-3">Is TempTools free?</h3>
-                    <p class="text-gray-400">Yes, completely free with no limits.</p>
+                    <h3 class="text-xl font-semibold mb-3">Is TempTools completely free?</h3>
+                    <p class="text-gray-400">Yes! All tools are 100% free with no limits or premium plans.</p>
                 </div>
                 <div>
                     <h3 class="text-xl font-semibold mb-3">Do you store my data?</h3>
-                    <p class="text-gray-400">No. Most tools run locally in your browser.</p>
+                    <p class="text-gray-400">No. Most tools run entirely in your browser.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">How long does the temporary email last?</h3>
+                    <p class="text-gray-400">The inbox stays active for about 10 minutes.</p>
                 </div>
             </div>
         </div>
@@ -124,13 +128,15 @@
         <!-- Privacy -->
         <div id="privacy" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
-            <p class="text-gray-400">We respect your privacy. We do not store personal data.</p>
+            <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
+            <p class="text-gray-300">We respect your privacy. We do not store personal data. Most tools run locally in your browser.</p>
         </div>
 
         <!-- Terms -->
         <div id="terms" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Terms of Service</h1>
-            <p class="text-gray-400">Use our tools for lawful purposes only.</p>
+            <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
+            <p class="text-gray-300">Use our tools for lawful purposes only.</p>
         </div>
     </div>
 
@@ -148,7 +154,7 @@
             document.getElementById('tab' + n).classList.add('tab-active');
         }
 
-        // Temp Mail
+        // Temp Mail (Auto Username)
         let sidToken = '', currentEmail = '';
         async function generateCustomEmail() {
             const username = 'user' + Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 999);
@@ -176,6 +182,21 @@
             link.download = 'qrcode.png';
             link.href = document.querySelector('#qrcontainer canvas').toDataURL();
             link.click();
+        }
+
+        // Password
+        function generatePassword() {
+            const length = 16;
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+            let pass = '';
+            for (let i = 0; i < length; i++) {
+                pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('password').textContent = pass;
+        }
+        function copyPassword() {
+            const pass = document.getElementById('password').textContent;
+            if (pass) navigator.clipboard.writeText(pass);
         }
 
         window.onload = () => {
