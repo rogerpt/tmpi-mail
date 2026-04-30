@@ -38,7 +38,7 @@
 
     <div class="max-w-6xl mx-auto p-6">
 
-        <!-- ==================== TOOLS SECTION ==================== -->
+        <!-- TOOLS SECTION -->
         <div id="home" class="content-section active">
             <div class="flex border-b border-gray-700 mb-8 overflow-x-auto">
                 <button onclick="switchTab(0)" class="tab-active px-6 py-4 text-lg whitespace-nowrap" id="tab0">📧 Temp Mail</button>
@@ -157,26 +157,64 @@
             </div>
         </div>
 
-        <!-- About, FAQ, Privacy, Terms (your content) -->
+        <!-- ABOUT -->
         <div id="about" class="content-section">
             <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
             <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities built for everyday use.</p>
-            <!-- Your expanded content here -->
+            <h2 class="text-2xl font-semibold mt-10 mb-4">Our Mission</h2>
+            <p class="text-gray-300">We believe everyone should have access to simple, powerful tools without creating accounts, paying fees, or compromising their privacy.</p>
+            <h2 class="text-2xl font-semibold mt-12 mb-6">What Makes Us Different</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-gray-800 p-6 rounded-2xl">
+                    <h3 class="font-semibold text-lg mb-3">🔒 Privacy First</h3>
+                    <p class="text-gray-400">Most tools run locally in your browser. We don't store your data.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-2xl">
+                    <h3 class="font-semibold text-lg mb-3">⚡ No Signup</h3>
+                    <p class="text-gray-400">Start using instantly — no accounts, no spam.</p>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-2xl">
+                    <h3 class="font-semibold text-lg mb-3">🌍 Always Free</h3>
+                    <p class="text-gray-400">No premium plans. No limits. Completely free.</p>
+                </div>
+            </div>
         </div>
 
+        <!-- FAQ -->
         <div id="faq" class="content-section">
             <h1 class="text-4xl font-bold mb-10">Frequently Asked Questions</h1>
-            <!-- Your FAQ content here -->
+            <div class="space-y-8 max-w-3xl">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Is TempTools completely free?</h3>
+                    <p class="text-gray-400">Yes! All tools are 100% free with no limits or premium plans.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Do you store my data?</h3>
+                    <p class="text-gray-400">No. Most tools run entirely in your browser and never leave your device.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">How long does the temporary email last?</h3>
+                    <p class="text-gray-400">The inbox stays active for about 10 minutes. A new email is generated after that.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Are the passwords secure?</h3>
+                    <p class="text-gray-400">Yes. They are generated randomly on your device.</p>
+                </div>
+            </div>
         </div>
 
+        <!-- Privacy -->
         <div id="privacy" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
-            <!-- Your Privacy content here -->
+            <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
+            <p class="text-gray-300">We do not collect or store personal data. Most tools run locally in your browser. Temporary email is handled by a third-party service.</p>
         </div>
 
+        <!-- Terms -->
         <div id="terms" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Terms of Service</h1>
-            <!-- Your Terms content here -->
+            <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
+            <p class="text-gray-300">Use our tools for lawful purposes only. We are not responsible for content sent through third-party services.</p>
         </div>
     </div>
 
@@ -194,7 +232,6 @@
             document.getElementById('tab' + n).classList.add('tab-active');
         }
 
-        // ==================== All Tool Functions ====================
         // Temp Mail (Auto Username)
         let sidToken = '', currentEmail = '';
         async function generateCustomEmail() {
@@ -209,46 +246,10 @@
         }
         function copyEmail() { if (currentEmail) navigator.clipboard.writeText(currentEmail); }
 
-        // QR Code
-        let currentQR = null;
-        function generateQR() {
-            const text = document.getElementById('qrtext').value.trim() || "https://tempapp.guru";
-            const container = document.getElementById('qrcontainer');
-            container.innerHTML = '';
-            currentQR = new QRCode(container, { text: text, width: 280, height: 280 });
-        }
-        function downloadQR() {
-            if (!currentQR) return alert("Generate a QR first");
-            const link = document.createElement('a');
-            link.download = 'qrcode.png';
-            link.href = document.querySelector('#qrcontainer canvas').toDataURL();
-            link.click();
-        }
-
-        // Password
-        function updateLength() { document.getElementById('lengthValue').textContent = document.getElementById('length').value; }
-        function generatePassword() {
-            const length = parseInt(document.getElementById('length').value);
-            let chars = '';
-            if (document.getElementById('upper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-            if (document.getElementById('lower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
-            if (document.getElementById('numbers').checked) chars += '0123456789';
-            if (document.getElementById('symbols').checked) chars += '!@#$%^&*()';
-            if (chars === '') chars = 'abcdefghijklmnopqrstuvwxyz';
-            let pass = '';
-            for (let i = 0; i < length; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
-            document.getElementById('password').textContent = pass;
-        }
-        function copyPassword() {
-            const pass = document.getElementById('password').textContent;
-            if (pass) navigator.clipboard.writeText(pass);
-        }
-
-        // Image Compressor & Text Tools functions are included in full version
-
         window.onload = () => {
             showSection('home');
             switchTab(0);
+            generateCustomEmail();
         };
     </script>
 </body>
