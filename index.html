@@ -27,16 +27,12 @@
             <div class="flex items-center gap-8 text-sm font-medium">
                 <a href="#" onclick="showSection('home')" class="nav-link text-white">🛠 Tools</a>
                 <a href="#" onclick="showSection('about')" class="nav-link text-gray-300 hover:text-white">About</a>
-                <a href="#" onclick="showSection('faq')" class="nav-link text-gray-300 hover:text-white">FAQ</a>
-                <a href="#" onclick="showSection('privacy')" class="nav-link text-gray-300 hover:text-white">Privacy</a>
-                <a href="#" onclick="showSection('terms')" class="nav-link text-gray-300 hover:text-white">Terms</a>
             </div>
         </div>
     </nav>
 
     <div class="max-w-6xl mx-auto p-6">
 
-        <!-- TOOLS SECTION -->
         <div id="home" class="content-section active">
             <div class="flex border-b border-gray-700 mb-8 overflow-x-auto">
                 <button onclick="switchTab(0)" class="tab-active px-6 py-4 text-lg whitespace-nowrap" id="tab0">📧 Temp Mail</button>
@@ -58,7 +54,7 @@
                             </select>
                         </div>
                         <div class="flex items-end">
-                            <button onclick="generateCustomEmail()" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium">Generate Email</button>
+                            <button onclick="generateCustomEmail()" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium">Generate New Email</button>
                         </div>
                     </div>
                     <div class="mt-6 flex gap-3">
@@ -69,14 +65,13 @@
                         <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
                     </div>
                 </div>
+
                 <div class="bg-gray-800 rounded-2xl overflow-hidden">
                     <div class="px-6 py-4 border-b flex justify-between">
                         <h2 class="font-semibold">Inbox</h2>
                         <button onclick="refreshInbox()" class="text-blue-400">Refresh</button>
                     </div>
-                    <div id="inbox" class="email-list divide-y divide-gray-700 p-8 text-center text-gray-500">
-                        No messages yet
-                    </div>
+                    <div id="inbox" class="email-list divide-y divide-gray-700"></div>
                 </div>
             </div>
 
@@ -94,22 +89,18 @@
             </div>
         </div>
 
-        <!-- About -->
         <div id="about" class="content-section">
-            <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
-            <p class="text-gray-300">Free online utilities with privacy in mind.</p>
+            <h1 class="text-4xl font-bold">About TempTools</h1>
         </div>
-
     </div>
 
     <script>
-        // Section Navigation
+        // Navigation
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(section).classList.add('active');
         }
 
-        // Tool Tab Switching
         function switchTab(n) {
             document.querySelectorAll('#home > div[id^="content"]').forEach(el => el.classList.add('hidden'));
             document.getElementById('content' + n).classList.remove('hidden');
@@ -120,7 +111,7 @@
 
         // ==================== TEMP MAIL ====================
         let sidToken = '', currentEmail = '';
-        let timerInterval;
+        let timerInterval, inboxInterval, messages = [];
 
         async function generateCustomEmail() {
             const username = document.getElementById('username').value.trim() || Math.random().toString(36).substring(2, 10);
@@ -131,7 +122,10 @@
                 currentEmail = data.email_addr;
                 document.getElementById('email').textContent = currentEmail;
                 startTimer();
-            } catch (e) { alert("Service busy. Try again."); }
+                startAutoRefresh();
+            } catch (e) {
+                alert("Service busy. Try again in a few seconds.");
+            }
         }
 
         function startTimer() {
@@ -142,7 +136,41 @@
                 const min = Math.floor(time / 60).toString().padStart(2, '0');
                 const sec = (time % 60).toString().padStart(2, '0');
                 document.getElementById('timer').textContent = `${min}:${sec}`;
+                if (time <= 0) generateCustomEmail();
             }, 1000);
+        }
+
+        async function fetchInbox() {
+            if (!sidToken) return;
+            try {
+                const res = await fetch(`https://api.guerrillamail.com/ajax.php?f=get_email_list&offset=0&lang=en&sid_token=${sidToken}`);
+                const data = await res.json();
+                messages = data.list || [];
+                updateInbox();
+            } catch (e) {}
+        }
+
+        function updateInbox() {
+            const el = document.getElementById('inbox');
+            if (messages.length === 0) {
+                el.innerHTML = `<div class="p-12 text-center text-gray-500">No messages yet.<br>Send email to <span class="font-mono">${currentEmail}</span></div>`;
+                return;
+            }
+            // Simple inbox display
+            el.innerHTML = messages.map(m => `
+                <div class="px-6 py-4 hover:bg-gray-700 cursor-pointer">
+                    <div class="flex justify-between">
+                        <p class="font-medium">${m.mail_from}</p>
+                        <p class="text-xs text-gray-500">${new Date(m.mail_timestamp * 1000).toLocaleTimeString()}</p>
+                    </div>
+                    <p class="text-gray-300">${m.mail_subject || '(no subject)'}</p>
+                </div>
+            `).join('');
+        }
+
+        function startAutoRefresh() {
+            clearInterval(inboxInterval);
+            inboxInterval = setInterval(fetchInbox, 5000);
         }
 
         function copyEmail() {
@@ -150,21 +178,19 @@
         }
 
         function refreshInbox() {
-            alert("Inbox refresh coming soon");
+            fetchInbox();
         }
 
-        // ==================== QR CODE ====================
+        // QR Code
         let currentQR = null;
-
         function generateQR() {
             const text = document.getElementById('qrtext').value.trim() || "https://tempapp.guru";
             const container = document.getElementById('qrcontainer');
             container.innerHTML = '';
             currentQR = new QRCode(container, { text: text, width: 280, height: 280 });
         }
-
         function downloadQR() {
-            if (!currentQR) return alert("Generate a QR code first");
+            if (!currentQR) return alert("Generate first");
             const link = document.createElement('a');
             link.download = 'qrcode.png';
             link.href = document.querySelector('#qrcontainer canvas').toDataURL();
@@ -174,7 +200,8 @@
         // Initialize
         window.onload = () => {
             showSection('home');
-            switchTab(0);        // Start on Temp Mail
+            switchTab(0);
+            generateCustomEmail();   // Auto start Temp Mail
         };
     </script>
 </body>
