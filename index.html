@@ -43,40 +43,86 @@
                 <button onclick="switchTab(4)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab4">📝 Text Tools</button>
             </div>
 
-            <!-- Password Generator (Improved) -->
-            <div id="content2">
-                <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
-                    <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
-                    
-                    <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6 min-h-[70px] flex items-center justify-center"></div>
-
-                    <div class="mb-6">
-                        <label class="block text-sm text-gray-400 mb-2">Length: <span id="lengthValue" class="font-mono">16</span></label>
-                        <input type="range" id="length" min="8" max="32" value="16" class="w-full accent-blue-500" oninput="updateLength()">
+            <!-- Temp Mail -->
+            <div id="content0">
+                <div class="bg-gray-800 rounded-2xl p-6 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1">Username</label>
+                            <input id="username" type="text" placeholder="yourname" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-sm block mb-1">Domain</label>
+                            <select id="domain" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3">
+                                <option value="guerrillamail.com">guerrillamail.com</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="generateCustomEmail()" class="w-full bg-green-600 hover:bg-green-700 py-3 rounded-xl font-medium">Generate New Email</button>
+                        </div>
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4 text-sm mb-8">
-                        <label class="flex items-center gap-2"><input type="checkbox" id="upper" checked> Uppercase (A-Z)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="lower" checked> Lowercase (a-z)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="numbers" checked> Numbers (0-9)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="symbols" checked> Symbols (!@#$...)</label>
+                    <div class="mt-6 flex gap-3">
+                        <code id="email" class="bg-gray-900 px-5 py-4 rounded-xl text-xl font-mono flex-1"></code>
+                        <button onclick="copyEmail()" class="bg-gray-700 hover:bg-gray-600 p-4 rounded-xl"><i class="fas fa-copy"></i></button>
                     </div>
-
-                    <button onclick="generatePassword()" class="w-full bg-purple-600 hover:bg-purple-700 py-4 rounded-2xl font-medium mb-3">Generate New Password</button>
-                    <button onclick="copyPassword()" class="w-full bg-gray-700 hover:bg-gray-600 py-4 rounded-2xl font-medium">Copy Password</button>
+                    <div class="text-center mt-4">
+                        <div id="timer" class="text-5xl font-mono font-bold text-orange-400">10:00</div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 rounded-2xl overflow-hidden">
+                    <div class="px-6 py-4 border-b flex justify-between">
+                        <h2 class="font-semibold">Inbox</h2>
+                        <button onclick="refreshInbox()" class="text-blue-400">Refresh</button>
+                    </div>
+                    <div id="inbox" class="email-list divide-y divide-gray-700"></div>
                 </div>
             </div>
 
+            <!-- QR Code -->
+            <div id="content1" class="hidden">
+                <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
+                    <h2 class="text-2xl font-bold mb-6 text-center">QR Code Generator</h2>
+                    <input id="qrtext" type="text" value="https://tempapp.guru" class="w-full bg-gray-900 border border-gray-700 rounded-2xl px-5 py-4 mb-6">
+                    <div class="flex gap-4 mb-6">
+                        <button onclick="generateQR()" class="flex-1 bg-blue-600 py-3 rounded-2xl">Generate</button>
+                        <button onclick="downloadQR()" class="flex-1 bg-emerald-600 py-3 rounded-2xl">Download PNG</button>
+                    </div>
+                    <div id="qrcontainer" class="bg-white p-6 rounded-2xl flex justify-center min-h-[280px]"></div>
+                </div>
+            </div>
+
+            <!-- Password Generator (with options) -->
+            <div id="content2" class="hidden">
+                <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
+                    <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
+                    <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6 min-h-[70px]"></div>
+                    
+                    <div class="mb-6">
+                        <label class="block text-sm text-gray-400 mb-2">Length: <span id="lengthValue">16</span></label>
+                        <input type="range" id="length" min="8" max="32" value="16" class="w-full accent-blue-500" oninput="updateLength()">
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 text-sm mb-8">
+                        <label><input type="checkbox" id="upper" checked> Uppercase</label>
+                        <label><input type="checkbox" id="lower" checked> Lowercase</label>
+                        <label><input type="checkbox" id="numbers" checked> Numbers</label>
+                        <label><input type="checkbox" id="symbols" checked> Symbols</label>
+                    </div>
+                    <button onclick="generatePassword()" class="w-full bg-purple-600 py-4 rounded-2xl font-medium mb-3">Generate New Password</button>
+                    <button onclick="copyPassword()" class="w-full bg-gray-700 py-4 rounded-2xl font-medium">Copy Password</button>
+                </div>
+            </div>
+
+            <!-- Image Compressor & Text Tools can be added if needed -->
+
         </div>
 
-        <!-- About Section -->
         <div id="about" class="content-section">
-            <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
-            <p class="text-gray-300">Free, fast, and privacy-friendly online utilities.</p>
+            <h1 class="text-4xl font-bold">About TempTools</h1>
         </div>
     </div>
 
     <script>
+        // Navigation
         function showSection(section) {
             document.querySelectorAll('.content-section').forEach(el => el.classList.remove('active'));
             document.getElementById(section).classList.add('active');
@@ -98,12 +144,10 @@
         function generatePassword() {
             const length = parseInt(document.getElementById('length').value);
             let chars = '';
-            
             if (document.getElementById('upper').checked) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
             if (document.getElementById('lower').checked) chars += 'abcdefghijklmnopqrstuvwxyz';
             if (document.getElementById('numbers').checked) chars += '0123456789';
-            if (document.getElementById('symbols').checked) chars += '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
+            if (document.getElementById('symbols').checked) chars += '!@#$%^&*()_+-';
             if (chars === '') chars = 'abcdefghijklmnopqrstuvwxyz';
 
             let pass = '';
@@ -115,17 +159,29 @@
 
         function copyPassword() {
             const pass = document.getElementById('password').textContent;
-            if (pass) {
-                navigator.clipboard.writeText(pass);
-                alert("Password copied to clipboard!");
-            }
+            if (pass) navigator.clipboard.writeText(pass);
+        }
+
+        // QR Code
+        let currentQR = null;
+        function generateQR() {
+            const text = document.getElementById('qrtext').value.trim() || "https://tempapp.guru";
+            const container = document.getElementById('qrcontainer');
+            container.innerHTML = '';
+            currentQR = new QRCode(container, { text: text, width: 280, height: 280 });
+        }
+        function downloadQR() {
+            if (!currentQR) return alert("Generate a QR first");
+            const link = document.createElement('a');
+            link.download = 'qrcode.png';
+            link.href = document.querySelector('#qrcontainer canvas').toDataURL();
+            link.click();
         }
 
         // Initialize
         window.onload = () => {
             showSection('home');
-            switchTab(2);           // Start on Password tab
-            generatePassword();     // Generate first password
+            switchTab(0);
         };
     </script>
 </body>
