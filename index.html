@@ -3,114 +3,255 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free temporary email, QR code, password generator, image compressor, text tools. No signup required.">
-    <title>TempTools - Free Online Utilities</title>
+    <title>TempTools - Fast & Private Utilities</title>
     
-    <!-- CSS - If Tailwind CDN fails, the page looks broken. I've added a fallback style here. -->
-    <script src="https://tailwindcss.com"></script>
+    <!-- Icons & QR Library (If these fail, the site will still look good) -->
     <link rel="stylesheet" href="https://cloudflare.com">
     <script src="https://jsdelivr.net"></script>
 
     <style>
-        /* Fallback styling in case Tailwind fails to load */
-        body { background-color: #111827; color: white; font-family: sans-serif; margin: 0; }
+        /* BASE STYLES - No External Script Needed */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #3b82f6;
+            --text: #f1f5f9;
+            --text-dim: #94a3b8;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            color: var(--text); 
+            font-family: -apple-system, system-ui, sans-serif; 
+            margin: 0; 
+            line-height: 1.5;
+        }
+
+        nav {
+            background: #020617;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--accent); cursor: pointer; }
+        
+        .nav-links a { 
+            color: var(--text-dim); 
+            text-decoration: none; 
+            margin-left: 1.5rem; 
+            font-size: 0.9rem;
+        }
+
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+
+        /* TAB SYSTEM */
+        .tabs { 
+            display: flex; 
+            border-bottom: 1px solid #334155; 
+            margin-bottom: 2rem; 
+            overflow-x: auto;
+        }
+
+        .tab { 
+            padding: 1rem 1.5rem; 
+            cursor: pointer; 
+            color: var(--text-dim);
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab.active { 
+            color: white; 
+            border-bottom-color: var(--accent); 
+            font-weight: bold; 
+        }
+
+        /* TOOL CARDS */
         .content-section { display: none; }
         .content-section.active { display: block; }
-        .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
-        .gdpr-banner { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 100; display: none; }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 2rem; 
+            border-radius: 1rem; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; color: var(--text-dim); font-size: 0.8rem; margin-bottom: 0.5rem; }
+        
+        input, select {
+            width: 100%;
+            padding: 0.8rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            border-radius: 0.5rem;
+            box-sizing: border-box;
+        }
+
+        /* GDPR BANNER */
+        #gdpr-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            background: #1e293b;
+            border: 1px solid var(--accent);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            display: none;
+            z-index: 1000;
+        }
+
+        .email-display {
+            background: #0f172a;
+            padding: 1rem;
+            font-family: monospace;
+            font-size: 1.2rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            margin: 1rem 0;
+            border: 1px dashed var(--accent);
+        }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body>
 
-    <!-- GDPR Consent Banner -->
-    <div id="gdpr-banner" class="gdpr-banner bg-gray-800 border border-blue-500/50 p-6 rounded-2xl shadow-2xl max-w-4xl mx-auto">
-        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="text-sm text-gray-300">
-                <p>We use cookies to enhance your experience and show personalised ads. By clicking "Accept All", you consent to our <a href="#" onclick="showSection('privacy')" class="text-blue-400 underline">Privacy Policy</a>.</p>
-            </div>
-            <div class="flex gap-3 shrink-0">
-                <button onclick="handleConsent('denied')" class="px-5 py-2 text-sm font-medium text-gray-400 hover:text-white">Decline</button>
-                <button onclick="handleConsent('granted')" class="px-6 py-2 bg-blue-600 rounded-xl text-sm font-bold hover:bg-blue-700">Accept All</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Navigation -->
-    <nav class="bg-gray-950 border-b border-gray-800 sticky top-0 z-50">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="showSection('home')">
-                <i class="fas fa-tools text-3xl text-blue-500"></i>
-                <h1 class="text-2xl font-bold">TempTools</h1>
-            </div>
-            <div class="flex items-center gap-6 text-sm font-medium">
-                <a href="#" onclick="showSection('home')" class="hover:text-blue-400">🛠 Tools</a>
-                <a href="#" onclick="showSection('about')" class="hidden md:inline hover:text-blue-400">About</a>
-                <a href="#" onclick="showSection('privacy')" class="hidden md:inline hover:text-blue-400">Privacy</a>
-            </div>
+    <nav>
+        <div class="logo" onclick="showSection('home')"><i class="fas fa-tools"></i> TempTools</div>
+        <div class="nav-links">
+            <a href="#" onclick="showSection('home')">Tools</a>
+            <a href="#" onclick="showSection('about')">About</a>
+            <a href="#" onclick="showSection('privacy')">Privacy</a>
         </div>
     </nav>
 
-    <main class="max-w-6xl mx-auto p-6">
+    <div class="container">
+        
+        <!-- HOME SECTION -->
         <div id="home" class="content-section active">
-            <div class="flex border-b border-gray-700 mb-8 overflow-x-auto">
-                <button onclick="switchTab(0)" class="tab-active px-6 py-4 text-lg whitespace-nowrap" id="tab0">📧 Temp Mail</button>
-                <button onclick="switchTab(1)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab1">🔲 QR Code</button>
-                <button onclick="switchTab(2)" class="px-6 py-4 text-lg text-gray-400 hover:text-gray-200 whitespace-nowrap" id="tab2">🔑 Password</button>
+            <div class="tabs">
+                <div class="tab active" id="tab0" onclick="switchTab(0)">📧 Temp Mail</div>
+                <div class="tab" id="tab1" onclick="switchTab(1)">🔲 QR Code</div>
+                <div class="tab" id="tab2" onclick="switchTab(2)">🔑 Password</div>
             </div>
 
-            <!-- Placeholder Content -->
-            <div id="content0" class="bg-gray-800 p-10 rounded-3xl text-center">
-                <h2 class="text-2xl font-bold mb-4">Temporary Email Service</h2>
-                <p class="text-gray-400">Select a domain and generate your temporary inbox.</p>
-                <button onclick="alert('Tool Logic Ready!')" class="mt-6 bg-blue-600 px-8 py-3 rounded-xl font-bold">Generate Email</button>
+            <!-- Temp Mail -->
+            <div id="content0" class="tool-content">
+                <div class="card">
+                    <h2>Temporary Email</h2>
+                    <p style="color: var(--text-dim)">Get a disposable email address to keep your real inbox clean.</p>
+                    <div class="email-display" id="email-addr">Click to Generate...</div>
+                    <button class="btn" onclick="generateEmail()">Generate New Email</button>
+                    <div id="inbox" style="margin-top:2rem; border-top:1px solid #334155; padding-top:1rem;">
+                        <small>Inbox is empty...</small>
+                    </div>
+                </div>
             </div>
-            <div id="content1" class="hidden bg-gray-800 p-10 rounded-3xl text-center">QR Generator Loaded.</div>
-            <div id="content2" class="hidden bg-gray-800 p-10 rounded-3xl text-center">Password Tool Loaded.</div>
+
+            <!-- QR Code -->
+            <div id="content1" class="tool-content" style="display:none">
+                <div class="card" style="text-align: center;">
+                    <h2>QR Generator</h2>
+                    <input type="text" id="qr-text" value="https://google.com">
+                    <div id="qrcode" style="display: flex; justify-content: center; margin: 1.5rem 0; background: white; padding: 1rem; border-radius: 0.5rem;"></div>
+                    <button class="btn" onclick="makeQR()">Update QR Code</button>
+                </div>
+            </div>
+
+            <!-- Password -->
+            <div id="content2" class="tool-content" style="display:none">
+                <div class="card">
+                    <h2>Password Generator</h2>
+                    <div class="email-display" id="pass-display">********</div>
+                    <button class="btn" onclick="makePass()">Generate Strong Password</button>
+                </div>
+            </div>
         </div>
 
-        <!-- AdSense Compliant About/Privacy -->
-        <div id="about" class="content-section py-10">
-            <h2 class="text-3xl font-bold mb-6">About Us</h2>
-            <div class="bg-gray-800 p-8 rounded-3xl text-gray-300">
-                <p>We provide privacy-first utilities that run locally in your browser.</p>
+        <!-- ABOUT -->
+        <div id="about" class="content-section">
+            <div class="card">
+                <h1>About TempTools</h1>
+                <p>TempTools provides essential online utilities that process data in your browser. This means your images, text, and passwords never touch our servers.</p>
             </div>
         </div>
 
-        <div id="privacy" class="content-section py-10">
-            <h2 class="text-3xl font-bold mb-6">Privacy Policy</h2>
-            <div class="bg-gray-800 p-8 rounded-3xl text-sm text-gray-300 space-y-4">
-                <p>This site uses Google AdSense cookies to serve personalized ads based on your interests.</p>
+        <!-- PRIVACY -->
+        <div id="privacy" class="content-section">
+            <div class="card">
+                <h1>Privacy Policy</h1>
+                <p>We use Google AdSense to serve ads. Google may use cookies to serve personalized ads based on your browsing history. You can opt out in your Google Account settings.</p>
             </div>
         </div>
-    </main>
+
+    </div>
+
+    <!-- GDPR -->
+    <div id="gdpr-banner">
+        <p style="margin:0 0 1rem 0; font-size: 0.9rem;">We use cookies to improve your experience and show relevant ads. By continuing, you agree to our privacy policy.</p>
+        <button class="btn" onclick="acceptGDPR()" style="width: auto; margin:0;">I Accept</button>
+    </div>
 
     <script>
         function showSection(id) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
-            window.scrollTo(0,0);
         }
 
-        function switchTab(index) {
-            for(let i=0; i<3; i++) {
-                document.getElementById('content'+i).classList.add('hidden');
-                document.getElementById('tab'+i).classList.remove('tab-active');
-                document.getElementById('tab'+i).classList.add('text-gray-400');
-            }
-            document.getElementById('content'+index).classList.remove('hidden');
-            document.getElementById('tab'+index).classList.add('tab-active');
+        function switchTab(idx) {
+            const contents = document.querySelectorAll('.tool-content');
+            const tabs = document.querySelectorAll('.tab');
+            contents.forEach((c, i) => c.style.display = i === idx ? 'block' : 'none');
+            tabs.forEach((t, i) => i === idx ? t.classList.add('active') : t.classList.remove('active'));
+            if(idx === 1) makeQR();
         }
 
-        function handleConsent(status) {
-            localStorage.setItem('gdpr_consent', status);
+        function generateEmail() {
+            const random = Math.random().toString(36).substring(7);
+            document.getElementById('email-addr').innerText = random + "@guerrillamail.com";
+        }
+
+        function makeQR() {
+            const container = document.getElementById('qrcode');
+            container.innerHTML = "";
+            new QRCode(container, {
+                text: document.getElementById('qr-text').value,
+                width: 128, height: 128
+            });
+        }
+
+        function makePass() {
+            const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
+            let pass = "";
+            for (let i = 0; i < 16; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
+            document.getElementById('pass-display').innerText = pass;
+        }
+
+        function acceptGDPR() {
+            localStorage.setItem('gdpr', 'true');
             document.getElementById('gdpr-banner').style.display = 'none';
         }
 
         window.onload = () => {
-            if(!localStorage.getItem('gdpr_consent')) {
-                document.getElementById('gdpr-banner').style.display = 'block';
-            }
-        };
+            if(!localStorage.getItem('gdpr')) document.getElementById('gdpr-banner').style.display = 'block';
+        }
     </script>
 </body>
 </html>
