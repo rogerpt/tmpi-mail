@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Free temporary email, QR code, password generator, image compressor, text tools. No signup required.">
+    <meta name="description" content="Free temporary email, QR code, password generator and more.">
     <title>TempTools - Free Online Utilities</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -14,8 +14,6 @@
         .content-section.active { display: block; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
         .email-list { max-height: 55vh; overflow-y: auto; }
-        .drop-zone { border: 3px dashed #4b5563; transition: all 0.3s; }
-        .drop-zone.dragover { border-color: #3b82f6; background-color: #1e2937; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -105,10 +103,8 @@
         <div id="about" class="content-section">
             <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
             <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities built for everyday use.</p>
-            
-            <h2 class="text-2xl font-semibold mt-12 mb-4">Our Mission</h2>
+            <h2 class="text-2xl font-semibold mt-10 mb-4">Our Mission</h2>
             <p class="text-gray-300">We believe everyone should have access to simple, powerful tools without creating accounts, paying fees, or compromising their privacy. Whether you need a temporary email for verification, a quick QR code, or to compress an image — we're here to help.</p>
-
             <h2 class="text-2xl font-semibold mt-12 mb-6">What Makes Us Different</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-gray-800 p-6 rounded-2xl">
@@ -124,8 +120,6 @@
                     <p class="text-gray-400">No premium plans. No limits. No hidden fees. Ever.</p>
                 </div>
             </div>
-
-            <p class="mt-12 text-gray-400">TempTools was created as a side project to solve real everyday problems quickly and privately. We plan to keep adding more useful tools based on user feedback.</p>
         </div>
 
         <!-- FAQ -->
@@ -160,8 +154,9 @@
             <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
             <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
             <div class="prose prose-invert">
-                <p>We are committed to protecting your privacy. We do not collect or store personal data. Most tools run locally in your browser. Temporary email is powered by a third-party service.</p>
+                <p>We are committed to protecting your privacy. We do not collect or store personal data. Most tools run locally in your browser. Temporary email is powered by a third-party service (Guerrilla Mail).</p>
                 <p>We use Google AdSense for advertising, which may use cookies.</p>
+                <p>No personal information is shared with third parties except as necessary for the temporary email service.</p>
             </div>
         </div>
 
@@ -170,8 +165,13 @@
             <h1 class="text-4xl font-bold mb-8">Terms of Service</h1>
             <p class="text-gray-400 mb-6">Last updated: April 30, 2026</p>
             <div class="prose prose-invert">
-                <p>By using TempTools, you agree to use our tools for lawful purposes only. Do not use temporary email for spam, phishing, or illegal activities.</p>
-                <p>The service is provided "as is". We are not responsible for emails sent or received through third-party services.</p>
+                <p>By using TempTools, you agree to these Terms.</p>
+                <h2 class="text-2xl font-semibold mt-8">Acceptable Use</h2>
+                <p>You may use our tools for personal and lawful purposes only. Do not use the service for spam, phishing, illegal activities, or any harmful purpose.</p>
+                <h2 class="text-2xl font-semibold mt-8">Temporary Email</h2>
+                <p>The temporary email service is provided by a third-party. We are not responsible for the content of emails sent or received.</p>
+                <h2 class="text-2xl font-semibold mt-8">No Warranty</h2>
+                <p>The service is provided "as is". We do not guarantee uninterrupted availability or perfect functionality.</p>
             </div>
         </div>
     </div>
@@ -192,6 +192,8 @@
 
         // Temp Mail
         let sidToken = '', currentEmail = '';
+        let timerInterval;
+
         async function generateCustomEmail() {
             const username = 'user' + Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 999);
             try {
@@ -200,9 +202,24 @@
                 sidToken = data.sid_token;
                 currentEmail = data.email_addr;
                 document.getElementById('email').textContent = currentEmail;
+                startTimer();
             } catch (e) { alert("Service busy. Try again."); }
         }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 600;
+            timerInterval = setInterval(() => {
+                time--;
+                const min = Math.floor(time / 60).toString().padStart(2, '0');
+                const sec = (time % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${min}:${sec}`;
+                if (time <= 0) generateCustomEmail();
+            }, 1000);
+        }
+
         function copyEmail() { if (currentEmail) navigator.clipboard.writeText(currentEmail); }
+        function refreshInbox() { alert("Inbox refresh coming soon"); }
 
         // QR Code
         let currentQR = null;
@@ -236,6 +253,7 @@
         window.onload = () => {
             showSection('home');
             switchTab(0);
+            generateCustomEmail();
         };
     </script>
 </body>
