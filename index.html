@@ -87,36 +87,31 @@
                 </div>
             </div>
 
-            <!-- Password Generator (with options) -->
+            <!-- Password -->
             <div id="content2" class="hidden">
                 <div class="bg-gray-800 rounded-3xl p-8 max-w-md mx-auto">
                     <h2 class="text-2xl font-bold mb-6 text-center">Strong Password Generator</h2>
                     <div id="password" class="bg-gray-900 p-5 rounded-2xl text-2xl font-mono text-center break-all mb-6 min-h-[70px]"></div>
-                    
                     <div class="mb-6">
-                        <label class="block text-sm text-gray-400 mb-2">Length: <span id="lengthValue" class="font-mono">16</span></label>
+                        <label class="block text-sm text-gray-400 mb-2">Length: <span id="lengthValue">16</span></label>
                         <input type="range" id="length" min="8" max="32" value="16" class="w-full accent-blue-500" oninput="updateLength()">
                     </div>
-
-                    <div class="grid grid-cols-2 gap-4 text-sm mb-8">
-                        <label class="flex items-center gap-2"><input type="checkbox" id="upper" checked> Uppercase (A-Z)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="lower" checked> Lowercase (a-z)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="numbers" checked> Numbers (0-9)</label>
-                        <label class="flex items-center gap-2"><input type="checkbox" id="symbols" checked> Symbols (!@#$...)</label>
+                    <div class="grid grid-cols-2 gap-3 text-sm mb-8">
+                        <label><input type="checkbox" id="upper" checked> Uppercase</label>
+                        <label><input type="checkbox" id="lower" checked> Lowercase</label>
+                        <label><input type="checkbox" id="numbers" checked> Numbers</label>
+                        <label><input type="checkbox" id="symbols" checked> Symbols</label>
                     </div>
-
                     <button onclick="generatePassword()" class="w-full bg-purple-600 py-4 rounded-2xl font-medium mb-3">Generate New Password</button>
                     <button onclick="copyPassword()" class="w-full bg-gray-700 py-4 rounded-2xl font-medium">Copy Password</button>
                 </div>
             </div>
         </div>
 
-        <!-- About, FAQ, Privacy, Terms (with good content) -->
+        <!-- About, FAQ, Privacy, Terms with good content -->
         <div id="about" class="content-section">
             <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
-            <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities built for everyday use.</p>
-            <h2 class="text-2xl font-semibold mt-10 mb-4">Our Mission</h2>
-            <p class="text-gray-300">We believe everyone should have access to simple, powerful tools without creating accounts, paying fees, or compromising their privacy.</p>
+            <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities.</p>
         </div>
 
         <div id="faq" class="content-section">
@@ -158,8 +153,10 @@
             document.getElementById('tab' + n).classList.add('tab-active');
         }
 
-        // Temp Mail
+        // Temp Mail with fixed countdown
         let sidToken = '', currentEmail = '';
+        let timerInterval;
+
         async function generateCustomEmail() {
             const username = 'user' + Math.random().toString(36).substring(2, 10) + Math.floor(Math.random() * 999);
             try {
@@ -168,8 +165,22 @@
                 sidToken = data.sid_token;
                 currentEmail = data.email_addr;
                 document.getElementById('email').textContent = currentEmail;
+                startTimer();
             } catch (e) { alert("Service busy. Try again."); }
         }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            let time = 600; // 10 minutes
+            timerInterval = setInterval(() => {
+                time--;
+                const min = Math.floor(time / 60).toString().padStart(2, '0');
+                const sec = (time % 60).toString().padStart(2, '0');
+                document.getElementById('timer').textContent = `${min}:${sec}`;
+                if (time <= 0) generateCustomEmail();
+            }, 1000);
+        }
+
         function copyEmail() { if (currentEmail) navigator.clipboard.writeText(currentEmail); }
 
         // QR Code
@@ -188,11 +199,10 @@
             link.click();
         }
 
-        // Password Generator
+        // Password
         function updateLength() {
             document.getElementById('lengthValue').textContent = document.getElementById('length').value;
         }
-
         function generatePassword() {
             const length = parseInt(document.getElementById('length').value);
             let chars = '';
@@ -205,7 +215,6 @@
             for (let i = 0; i < length; i++) pass += chars.charAt(Math.floor(Math.random() * chars.length));
             document.getElementById('password').textContent = pass;
         }
-
         function copyPassword() {
             const pass = document.getElementById('password').textContent;
             if (pass) navigator.clipboard.writeText(pass);
