@@ -13,7 +13,6 @@
         .content-section { display: none; }
         .content-section.active { display: block; }
         .tab-active { border-bottom: 3px solid #3b82f6; color: white; font-weight: 600; }
-        .email-list { max-height: 55vh; overflow-y: auto; }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
@@ -99,28 +98,45 @@
             </div>
         </div>
 
-        <!-- About, FAQ, Privacy, Terms -->
+        <!-- ABOUT -->
         <div id="about" class="content-section">
             <h1 class="text-4xl font-bold mb-6">About TempTools</h1>
             <p class="text-xl text-gray-300">TempTools is a free, fast, and privacy-friendly collection of online utilities built for everyday use.</p>
+            <h2 class="text-2xl font-semibold mt-10 mb-4">Our Mission</h2>
+            <p class="text-gray-300">We believe everyone should have access to simple, powerful tools without creating accounts, paying fees, or compromising their privacy.</p>
         </div>
 
+        <!-- FAQ -->
         <div id="faq" class="content-section">
             <h1 class="text-4xl font-bold mb-10">Frequently Asked Questions</h1>
-            <div class="space-y-8">
-                <div><h3 class="text-xl font-semibold mb-3">Is TempTools free?</h3><p class="text-gray-400">Yes, completely free with no limits.</p></div>
-                <div><h3 class="text-xl font-semibold mb-3">Do you store data?</h3><p class="text-gray-400">No, most tools run locally in your browser.</p></div>
+            <div class="space-y-8 max-w-3xl">
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Is TempTools completely free?</h3>
+                    <p class="text-gray-400">Yes! All tools are 100% free with no limits or premium plans.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">Do you store my data?</h3>
+                    <p class="text-gray-400">No. Most tools run entirely in your browser and never leave your device.</p>
+                </div>
+                <div>
+                    <h3 class="text-xl font-semibold mb-3">How long does the temporary email last?</h3>
+                    <p class="text-gray-400">The inbox stays active for approximately 10 minutes. After that, a new email is generated automatically.</p>
+                </div>
             </div>
         </div>
 
+        <!-- Privacy -->
         <div id="privacy" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Privacy Policy</h1>
-            <p class="text-gray-400">We respect your privacy. We do not store personal data. Most tools run locally in your browser.</p>
+            <p class="text-gray-400 mb-6">Last updated: May 05, 2026</p>
+            <p class="text-gray-300">We respect your privacy. We do not collect or store personal data. Most tools run locally in your browser. Temporary email is powered by a third-party service.</p>
         </div>
 
+        <!-- Terms -->
         <div id="terms" class="content-section">
             <h1 class="text-4xl font-bold mb-8">Terms of Service</h1>
-            <p class="text-gray-400">Use our tools for lawful purposes only.</p>
+            <p class="text-gray-400 mb-6">Last updated: May 05, 2026</p>
+            <p class="text-gray-300">Use our tools for lawful purposes only. Do not use temporary email for illegal activities.</p>
         </div>
     </div>
 
